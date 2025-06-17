@@ -1,34 +1,31 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
-import landingImage from "./assets/MEDICOOO.jpg"; 
+import landingImage from "./assets/MEDICOOO.jpg";
 
 export default function LandingPage() {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/login");
+    navigate("/homepage");
   };
 
   return (
-    <div className="landing-container">
-      <div className="landing-content">
-        <div className="landing-text">
-          <div className="landing-title">
-            <h1>MEDICO</h1>
+    <div className="landing-page">
+      <div className="landing-container">
+        <div className="landing-content">
+          <div className="landing-text">
+            <h1 className="landing-title">MEDICO</h1>
+            <h2 className="landing-subtitle">HEALTH IS WEALTH</h2>
+            <button className="landing-btn" onClick={handleClick}>
+              LET’S GO
+            </button>
           </div>
-          <h2>
-            HEALTH IS WEALTH
-          </h2>
-          
-          <button className="primary-button" onClick={handleClick}>
-            LET’S GO
-          </button>
-        </div>
-        <div className="landing-image">
-          <img src={landingImage} alt="Landing" />
+          <div className="landing-image">
+            <img src={landingImage} alt="Landing" />
+          </div>
         </div>
       </div>
     </div>
   );
-}
+} 

@@ -1,0 +1,244 @@
+* {
+  box-sizing: border-box;
+}
+
+/* Main homepage container */
+.homepage {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f1fdf4 0%, #e8f5e8 100%);
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-shrink: 0;
+}
+
+/* Logo with image and text */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 24px;
+  color: #2e7d32;
+  cursor: default;
+}
+
+.logo-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #2e7d32;
+  font-weight: 600;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #1b5e20;
+}
+
+.signup-btn {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.signup-btn:hover {
+  background-color: #1b5e20;
+}
+
+/* Hero Section */
+.hero-section {
+  flex: 1 1 0;
+  min-height: 600px;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 64px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 48px 0;
+}
+
+.hero-content {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+  gap: 28px;
+  height: 100%;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  color: #111827;
+  letter-spacing: 1px;
+}
+
+.highlight {
+  color: #2e7d32;
+}
+
+.hero-content p {
+  font-size: 1.125rem;
+  margin-bottom: 36px;
+  color: #4b5563;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+.get-started {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 14px 36px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(46, 125, 50, 0.15);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 8px;
+}
+
+.get-started:hover {
+  background-color: #1b5e20;
+  box-shadow: 0 6px 20px rgba(27, 94, 32, 0.18);
+}
+
+.hero-image {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  padding: 0 16px;
+  height: 100%;
+}
+
+.hero-image img {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(46,125,50,0.10);
+  object-fit: contain;
+}
+
+/* Footer */
+.footer {
+  background-color: #1e293b;
+  color: white;
+  padding: 16px 0 8px 0;
+  margin-top: auto;
+  flex-shrink: 0;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+.footer-item h4 {
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.footer-item p {
+  margin: 4px 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero-section {
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 0;
+    min-height: 400px;
+  }
+  .hero-content,
+  .hero-image {
+    max-width: 100%;
+    flex: 1 1 0;
+  }
+  .hero-content h1 {
+    font-size: 2.25rem;
+  }
+  .get-started {
+    width: 100%;
+    padding: 16px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 8px;
+  }
+  .hero-section {
+    padding: 16px 0;
+    gap: 20px;
+    min-height: 250px;
+  }
+  .hero-content h1 {
+    font-size: 1.5rem;
+  }
+  .get-started {
+    font-size: 1rem;
+    padding: 12px 0;
+  }
+  .logo-image {
+    width: 40px;
+    height: 40px;
+  }
+}
+  
