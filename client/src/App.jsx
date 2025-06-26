@@ -5,6 +5,7 @@ import HomePage from "./HomePage";
 import Login from "./Login";
 import Signup from "./Signup";
 import AdminDashboard from "./AdminDashboard";
+import UserDashboard from "./UserDashboard";
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/homepage" element={<HomePage />} />
         <Route path="/dashboard/admin" element={<AdminDashboard />} />
+         <Route path="/dashboard/user" element={<UserDashboard />} />
         
       </Routes>
     </Router>
