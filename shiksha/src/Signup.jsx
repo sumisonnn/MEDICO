@@ -12,7 +12,7 @@ const Signup = () => {
     password: '',
     confirmPassword: '',
     phone: '',
-    role: 'Pharmacist',
+    role: 'Admin',
     agreeToTerms: false
   });
 
