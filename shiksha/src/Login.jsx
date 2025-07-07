@@ -21,6 +21,7 @@ const Login = () => {
       alert("Please enter both email and password");
     }
   };
+  
 
   const goToSignup = () => {
     navigate("/signup");

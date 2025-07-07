@@ -18,7 +18,7 @@ export default function LandingPage() {
             <h1>MEDICO</h1>
           </div>
           <h2>
-            Start your <br /> journey with us
+            HEALTH IS WEALTH
           </h2>
           
           <button className="primary-button" onClick={handleClick}>
