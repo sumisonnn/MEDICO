@@ -51,7 +51,7 @@ const Login = () => {
           <a href="#" className="forgot-link">
             Forgot password?
           </a>
-          <button type="submit">Login</button>
+          <button type="PLEASE SUBMIT">Login</button>
         </form>
         <p className="toggle-form">
           New user?{" "}
