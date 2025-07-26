@@ -9,12 +9,24 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mock login: always redirect to user dashboard after 1s
-    setTimeout(() => {
-      navigate('/dashboard/user');
-    }, 1000);
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard/user");
+      } else {
+        alert(data.message || "Login failed");
+      }
+    } catch (err) {
+      alert("Server error");
+    }
   };
 
   return (

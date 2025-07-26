@@ -7,19 +7,34 @@ const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('User');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: name,
+          email,
+          password
+        }),
+      });
+      const data = await res.json();
       setLoading(false);
-      // Mock: always redirect to login
-      window.location.href = '/login';
-    }, 1000);
+      if (res.ok) {
+        window.location.href = "/login";
+      } else {
+        setError(data.message || "Signup failed");
+      }
+    } catch (err) {
+      setLoading(false);
+      setError("Server error");
+    }
   };
 
   return (
@@ -72,18 +87,6 @@ const Signup = () => {
                 placeholder="Enter your password"
                 required
               />
-            </div>
-            <div className="form-group">
-              <label htmlFor="role">Signup as</label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-              >
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
-              </select>
             </div>
             <button type="submit" className="signup-button" disabled={loading}>
               {loading ? 'Signing up...' : 'Sign Up'}

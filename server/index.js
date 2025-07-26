@@ -1,25 +1,21 @@
-import express from "express";
-import bodyParser from "body-parser";
-import { db } from "./database/index.js";
-import { userRouter } from "./route/index.js";
-import { authRouter } from "./route/index.js";
-import dotenv from "dotenv";
-import { authenticateToken } from "./middleware/token-middleware.js";
-import router from "./route/uploadRoutes.js";
-import { createUploadsFolder } from "./security/helper.js";
-
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import dotenv from 'dotenv';
 dotenv.config();
+import { connectDB } from './database.js';
+import authRoutes from './routes/auth.js';
 
 const app = express();
-
-const port = process.env.PORT || 5000;
+app.use(cors());
 app.use(bodyParser.json());
-app.use(authenticateToken);
-app.use("/api/users", userRouter);
-app.use("/api/auth", authRouter);
-app.use("/api/file", router);
-createUploadsFolder();
-app.listen(4001, function () {
-  console.log("project running in port ");
-  db();
-});
+
+app.use('/api/auth', authRoutes);
+
+const PORT = process.env.PORT || 5000;
+
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}); 
