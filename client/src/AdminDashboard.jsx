@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import './AdminDashboard.css';
+import Logout from './components/Logout';
 
 const sections = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -78,7 +79,10 @@ export default function AdminDashboard() {
       <div className="admin-content-area">
         <header className="admin-header">
           <div className="admin-header-title">Admin Dashboard</div>
-          <div className="admin-header-profile">👤 Admin</div>
+          <div className="admin-header-profile">
+            👤 Admin
+            <Logout />
+          </div>
         </header>
         <main className="admin-main">
           {active === 'dashboard' && (

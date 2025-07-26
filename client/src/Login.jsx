@@ -7,10 +7,12 @@ import logoIcon from './assets/logo.png';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -20,12 +22,19 @@ const Login = () => {
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("token", data.token);
-        navigate("/dashboard/user");
+        localStorage.setItem("userRole", data.user.role);
+        localStorage.setItem("userData", JSON.stringify(data.user));
+        // Redirect based on role
+        if (data.user.role === 'admin') {
+          navigate("/dashboard/admin");
+        } else {
+          navigate("/dashboard/user");
+        }
       } else {
-        alert(data.message || "Login failed");
+        setError(data.message || "Login failed");
       }
     } catch (err) {
-      alert("Server error");
+      setError("Server error");
     }
   };
 
@@ -72,6 +81,7 @@ const Login = () => {
             <button type="submit" className="signin-button">
               Sign in
             </button>
+            {error && <div className="error-message">{error}</div>}
           </form>
           <div className="signup-link">
             Don't have an account? <a href="/signup">Signup</a>

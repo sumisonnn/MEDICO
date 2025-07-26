@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import './UserDashboard.css';
+import Logout from './components/Logout';
 
 const sections = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -37,7 +38,10 @@ export default function UserDashboard() {
       <div className="user-content-area">
         <header className="user-header">
           <div className="user-header-title">User Dashboard</div>
-          <div className="user-header-profile">👤 User</div>
+          <div className="user-header-profile">
+            👤 User
+            <Logout />
+          </div>
         </header>
         <main className="user-main">
           {active === 'dashboard' && (
