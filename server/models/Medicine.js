@@ -23,6 +23,10 @@ export const Medicine = sequelize.define('Medicine', {
     type: DataTypes.INTEGER, 
     allowNull: false,
     defaultValue: 0
+  },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, { 
   timestamps: true 

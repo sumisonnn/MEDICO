@@ -179,6 +179,35 @@ export default function UserDashboard() {
                       padding: '16px',
                       backgroundColor: '#fff'
                     }}>
+                      {/* Medicine Image */}
+                      <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                        {medicine.image ? (
+                          <img 
+                            src={`http://localhost:5000${medicine.image}`} 
+                            alt={medicine.name}
+                            style={{ 
+                              width: '100%', 
+                              height: '150px', 
+                              objectFit: 'cover',
+                              borderRadius: '4px'
+                            }} 
+                          />
+                        ) : (
+                          <div style={{ 
+                            width: '100%', 
+                            height: '150px', 
+                            backgroundColor: '#f0f0f0',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#999'
+                          }}>
+                            No Image
+                          </div>
+                        )}
+                      </div>
+                      
                       <h3 style={{ margin: '0 0 8px 0', color: '#2e7d32' }}>{medicine.name}</h3>
                       <p style={{ margin: '4px 0', color: '#666' }}>Category: {medicine.category}</p>
                       <p style={{ margin: '4px 0', fontWeight: 'bold' }}>Price: ${parseFloat(medicine.price).toFixed(2)}</p>
@@ -195,7 +224,8 @@ export default function UserDashboard() {
                           padding: '8px 16px',
                           borderRadius: '4px',
                           cursor: medicine.stock > 0 ? 'pointer' : 'not-allowed',
-                          opacity: medicine.stock > 0 ? 1 : 0.6
+                          opacity: medicine.stock > 0 ? 1 : 0.6,
+                          width: '100%'
                         }}
                       >
                         {medicine.stock > 0 ? 'Add to Cart' : 'Out of Stock'}

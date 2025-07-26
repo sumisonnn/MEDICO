@@ -26,6 +26,30 @@ const apiCall = async (endpoint, options = {}) => {
   }
 };
 
+// FormData fetch wrapper for file uploads
+const apiCallFormData = async (endpoint, formData, method = 'POST') => {
+  const url = `${API_BASE}${endpoint}`;
+  const config = {
+    method: method,
+    body: formData
+    // Don't set Content-Type for FormData, let browser set it with boundary
+  };
+
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'API request failed');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
+
 // Helper functions for different HTTP methods
 export const api = {
   get: (endpoint) => apiCall(endpoint),
@@ -42,7 +66,12 @@ export const api = {
   
   delete: (endpoint) => apiCall(endpoint, {
     method: 'DELETE'
-  })
+  }),
+
+  // FormData methods for file uploads
+  postFormData: (endpoint, formData) => apiCallFormData(endpoint, formData, 'POST'),
+  
+  putFormData: (endpoint, formData) => apiCallFormData(endpoint, formData, 'PUT')
 };
 
 export default api; 

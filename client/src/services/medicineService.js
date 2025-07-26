@@ -11,14 +11,46 @@ export const medicineService = {
     return await api.get(`/medicines/${id}`);
   },
 
-  // Create new medicine
+  // Create new medicine with image
   createMedicine: async (medicineData) => {
-    return await api.post('/medicines', medicineData);
+    const formData = new FormData();
+    
+    // Add text fields
+    formData.append('name', medicineData.name);
+    formData.append('category', medicineData.category);
+    formData.append('price', medicineData.price);
+    formData.append('stock', medicineData.stock);
+    
+    // Add image if provided
+    if (medicineData.image) {
+      formData.append('image', medicineData.image);
+    }
+    
+    // Debug: Log FormData contents
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+    
+    return await api.postFormData('/medicines', formData);
   },
 
-  // Update medicine
+  // Update medicine with image
   updateMedicine: async (id, medicineData) => {
-    return await api.put(`/medicines/${id}`, medicineData);
+    const formData = new FormData();
+    
+    // Add text fields
+    formData.append('name', medicineData.name);
+    formData.append('category', medicineData.category);
+    formData.append('price', medicineData.price);
+    formData.append('stock', medicineData.stock);
+    
+    // Add image if provided
+    if (medicineData.image) {
+      formData.append('image', medicineData.image);
+    }
+    
+    return await api.putFormData(`/medicines/${id}`, formData);
   },
 
   // Delete medicine

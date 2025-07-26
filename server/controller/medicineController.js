@@ -27,20 +27,33 @@ export const getMedicineById = async (req, res) => {
   }
 };
 
-// Create new medicine
+// Create new medicine with image
 export const createMedicine = async (req, res) => {
   try {
     const { name, category, price, stock } = req.body;
     
-    if (!name || !category || !price || stock === undefined) {
+    // Debug: Log the received data
+    console.log('Received medicine data:', { name, category, price, stock });
+    console.log('File data:', req.file);
+    
+    // Check if required fields are present and not empty
+    if (!name || !category || !price || stock === undefined || 
+        name.trim() === '' || category.trim() === '' || price.toString().trim() === '' || stock.toString().trim() === '') {
       return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Handle image upload
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
     }
 
     const medicine = await Medicine.create({
       name,
       category,
       price: parseFloat(price),
-      stock: parseInt(stock)
+      stock: parseInt(stock),
+      image: imageUrl
     });
 
     res.status(201).json({ 
@@ -53,7 +66,7 @@ export const createMedicine = async (req, res) => {
   }
 };
 
-// Update medicine
+// Update medicine with image
 export const updateMedicine = async (req, res) => {
   try {
     const { name, category, price, stock } = req.body;
@@ -64,11 +77,18 @@ export const updateMedicine = async (req, res) => {
       return res.status(404).json({ message: 'Medicine not found' });
     }
 
+    // Handle image upload
+    let imageUrl = medicine.image; // Keep existing image if no new one
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
+
     await medicine.update({
       name: name || medicine.name,
       category: category || medicine.category,
       price: price ? parseFloat(price) : medicine.price,
-      stock: stock !== undefined ? parseInt(stock) : medicine.stock
+      stock: stock !== undefined ? parseInt(stock) : medicine.stock,
+      image: imageUrl
     });
 
     res.json({ 

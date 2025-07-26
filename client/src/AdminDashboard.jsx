@@ -13,6 +13,8 @@ export default function AdminDashboard() {
   const [active, setActive] = useState('home');
   const [medicines, setMedicines] = useState([]);
   const [form, setForm] = useState({ name: '', category: '', price: '', stock: '' });
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -41,15 +43,43 @@ export default function AdminDashboard() {
     setForm(f => ({ ...f, [name]: value }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearForm = () => {
+    setForm({ name: '', category: '', price: '', stock: '' });
+    setSelectedImage(null);
+    setImagePreview(null);
+    setEditingId(null);
+  };
+
   const handleAddMedicine = async (e) => {
     e.preventDefault();
     if (!form.name || !form.category || !form.price || !form.stock) return;
     
     setLoading(true);
     try {
-      await medicineService.createMedicine(form);
+      const medicineData = {
+        ...form,
+        image: selectedImage
+      };
+      
+      // Debug: Log what we're sending
+      console.log('Sending medicine data:', medicineData);
+      
+      await medicineService.createMedicine(medicineData);
       await fetchMedicines(); // Refresh the list
-      setForm({ name: '', category: '', price: '', stock: '' });
+      clearForm();
     } catch (error) {
       alert(error.message || 'Failed to add medicine');
     } finally {
@@ -60,16 +90,22 @@ export default function AdminDashboard() {
   const handleEdit = med => {
     setEditingId(med.id);
     setForm({ name: med.name, category: med.category, price: med.price, stock: med.stock });
+    setImagePreview(med.image ? `http://localhost:5000${med.image}` : null);
+    setSelectedImage(null);
   };
 
   const handleUpdateMedicine = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await medicineService.updateMedicine(editingId, form);
+      const medicineData = {
+        ...form,
+        image: selectedImage
+      };
+      
+      await medicineService.updateMedicine(editingId, medicineData);
       await fetchMedicines(); // Refresh the list
-      setEditingId(null);
-      setForm({ name: '', category: '', price: '', stock: '' });
+      clearForm();
     } catch (error) {
       alert(error.message || 'Failed to update medicine');
     } finally {
@@ -97,7 +133,7 @@ export default function AdminDashboard() {
             <div
               key={s.key}
               className={"admin-nav-link" + (active === s.key ? " active" : "")}
-              onClick={() => { setActive(s.key); setEditingId(null); setForm({ name: '', category: '', price: '', stock: '' }); }}
+              onClick={() => { setActive(s.key); clearForm(); }}
             >
               {s.label}
             </div>
@@ -137,18 +173,56 @@ export default function AdminDashboard() {
             <div className="admin-section">
               <h2>Manage Medicine</h2>
               <form className="medicine-form" onSubmit={editingId ? handleUpdateMedicine : handleAddMedicine} style={{ marginBottom: 24 }}>
-                <input name="name" value={form.name} onChange={handleFormChange} placeholder="Name" required />
-                <input name="category" value={form.category} onChange={handleFormChange} placeholder="Category" required />
-                <input name="price" value={form.price} onChange={handleFormChange} placeholder="Price" type="number" min="0" step="0.01" required />
-                <input name="stock" value={form.stock} onChange={handleFormChange} placeholder="Stock" type="number" min="0" required />
-                <button type="submit" disabled={loading}>
-                  {loading ? 'Processing...' : (editingId ? 'Update' : 'Add')}
-                </button>
-                {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ name: '', category: '', price: '', stock: '' }); }}>Cancel</button>}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <input name="name" value={form.name} onChange={handleFormChange} placeholder="Name" required />
+                  <input name="category" value={form.category} onChange={handleFormChange} placeholder="Category" required />
+                  <input name="price" value={form.price} onChange={handleFormChange} placeholder="Price" type="number" min="0" step="0.01" required />
+                  <input name="stock" value={form.stock} onChange={handleFormChange} placeholder="Stock" type="number" min="0" required />
+                </div>
+                
+                {/* Image Upload Section */}
+                <div style={{ marginTop: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                    Medicine Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    style={{ marginBottom: '8px' }}
+                  />
+                  {imagePreview && (
+                    <div style={{ marginTop: '8px' }}>
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        style={{ 
+                          maxWidth: '200px', 
+                          maxHeight: '200px', 
+                          border: '1px solid #ddd',
+                          borderRadius: '4px'
+                        }} 
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <div style={{ marginTop: '16px' }}>
+                  <button type="submit" disabled={loading}>
+                    {loading ? 'Processing...' : (editingId ? 'Update' : 'Add')}
+                  </button>
+                  {editingId && (
+                    <button type="button" onClick={clearForm} style={{ marginLeft: '8px' }}>
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </form>
+              
               <table className="medicine-table">
                 <thead>
                   <tr>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Category</th>
                     <th>Price</th>
@@ -159,6 +233,33 @@ export default function AdminDashboard() {
                 <tbody>
                   {medicines.map(med => (
                     <tr key={med.id}>
+                      <td>
+                        {med.image ? (
+                          <img 
+                            src={`http://localhost:5000${med.image}`} 
+                            alt={med.name}
+                            style={{ 
+                              width: '50px', 
+                              height: '50px', 
+                              objectFit: 'cover',
+                              borderRadius: '4px'
+                            }} 
+                          />
+                        ) : (
+                          <div style={{ 
+                            width: '50px', 
+                            height: '50px', 
+                            backgroundColor: '#f0f0f0',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#999'
+                          }}>
+                            No img
+                          </div>
+                        )}
+                      </td>
                       <td>{med.name}</td>
                       <td>{med.category}</td>
                       <td>${parseFloat(med.price).toFixed(2)}</td>

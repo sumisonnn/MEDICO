@@ -8,6 +8,7 @@ import {
   getMedicinesByCategory,
   searchMedicines
 } from '../controller/medicineController.js';
+import { uploadImage, handleUploadError } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
@@ -23,11 +24,11 @@ router.get('/category/:category', getMedicinesByCategory);
 // Get single medicine
 router.get('/:id', getMedicineById);
 
-// Create new medicine
-router.post('/', createMedicine);
+// Create new medicine with image upload
+router.post('/', uploadImage, handleUploadError, createMedicine);
 
-// Update medicine
-router.put('/:id', updateMedicine);
+// Update medicine with image upload
+router.put('/:id', uploadImage, handleUploadError, updateMedicine);
 
 // Delete medicine
 router.delete('/:id', deleteMedicine);

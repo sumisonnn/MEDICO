@@ -22,9 +22,9 @@ export const connectDB = async () => {
     import('./models/User.js');
     import('./models/Medicine.js');
     
-    // Sync all models
-    await sequelize.sync({ alter: true });
-    console.log('Database synced');
+    // Temporarily disable sync to avoid database errors
+    // await sequelize.sync({ alter: true });
+    console.log('Database models loaded (sync disabled)');
   } catch (error) {
     console.error('Database connection failed:', error);
     process.exit(1);
