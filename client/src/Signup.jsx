@@ -8,11 +8,13 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
     try {
       const res = await fetch("http://localhost:5000/api/auth/register", {
@@ -27,7 +29,14 @@ const Signup = () => {
       const data = await res.json();
       setLoading(false);
       if (res.ok) {
-        window.location.href = "/login";
+        setSuccess('Signup successful! Redirecting to login...');
+        setName('');
+        setEmail('');
+        setPassword('');
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
       } else {
         setError(data.message || "Signup failed");
       }
@@ -92,6 +101,7 @@ const Signup = () => {
               {loading ? 'Signing up...' : 'Sign Up'}
             </button>
             {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
           </form>
           <div className="login-link">
             Already have an account? <a href="/login">Login</a>

@@ -15,9 +15,6 @@ const Logout = () => {
 
   return (
     <button onClick={handleLogout} className="logout-button-modern" title="Logout">
-      <span className="material-icons" style={{ verticalAlign: 'middle', fontSize: 20, marginRight: 6 }}>
-        logout
-      </span>
       Logout
     </button>
   );
