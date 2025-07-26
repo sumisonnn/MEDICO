@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import authService from '../services/authService.js';
 
 const Logout = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userData');
+      authService.logout();
       navigate('/login');
     }
   };

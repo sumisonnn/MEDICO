@@ -16,10 +16,17 @@ export const sequelize = new Sequelize(
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    await sequelize.sync();
     console.log('Database connected');
-  } catch (err) {
-    console.error('Unable to connect to the database:', err);
+    
+    // Import models
+    import('./models/User.js');
+    import('./models/Medicine.js');
+    
+    // Sync all models
+    await sequelize.sync({ alter: true });
+    console.log('Database synced');
+  } catch (error) {
+    console.error('Database connection failed:', error);
     process.exit(1);
   }
 }; 

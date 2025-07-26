@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import loginImage from './assets/wall.png';
 import logoIcon from './assets/logo.png';
+import authService from './services/authService.js';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -14,27 +15,21 @@ const Login = () => {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userRole", data.user.role);
-        localStorage.setItem("userData", JSON.stringify(data.user));
-        // Redirect based on role
-        if (data.user.role === 'admin') {
-          navigate("/dashboard/admin");
-        } else {
-          navigate("/dashboard/user");
-        }
+      const data = await authService.login({ email, password });
+      
+      // Store user data
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", data.user.role);
+      localStorage.setItem("userData", JSON.stringify(data.user));
+      
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        navigate("/dashboard/admin");
       } else {
-        setError(data.message || "Login failed");
+        navigate("/dashboard/user");
       }
     } catch (err) {
-      setError("Server error");
+      setError(err.message || "Login failed");
     }
   };
 

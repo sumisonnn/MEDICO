@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './Signup.css';
 import signupImage from './assets/wall.png'; // Replace with your image
 import logoIcon from './assets/logo.png'; // Replace with your logo
+import authService from './services/authService.js';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -17,32 +18,24 @@ const Signup = () => {
     setSuccess('');
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: name,
-          email,
-          password
-        }),
+      await authService.register({
+        username: name,
+        email,
+        password
       });
-      const data = await res.json();
-      setLoading(false);
-      if (res.ok) {
-        setSuccess('Signup successful! Redirecting to login...');
-        setName('');
-        setEmail('');
-        setPassword('');
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
-      } else {
-        setError(data.message || "Signup failed");
-      }
+      
+      setSuccess('Signup successful! Redirecting to login...');
+      setName('');
+      setEmail('');
+      setPassword('');
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
     } catch (err) {
+      setError(err.message || "Signup failed");
+    } finally {
       setLoading(false);
-      setError("Server error");
     }
   };
 

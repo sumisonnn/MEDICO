@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import './AdminDashboard.css';
 import Logout from './components/Logout';
+import medicineService from './services/medicineService.js';
 
 const sections = [
   { key: 'home', label: 'Home' },
@@ -8,17 +9,26 @@ const sections = [
   { key: 'sales-history', label: 'Sales History' },
 ];
 
-const initialMedicines = [
-  { id: 1, name: 'Paracetamol', category: 'Pain Relief', price: 2.5, stock: 100 },
-  { id: 2, name: 'Amoxicillin', category: 'Antibiotic', price: 5.0, stock: 50 },
-  { id: 3, name: 'Cetirizine', category: 'Allergy', price: 1.5, stock: 8 },
-];
-
 export default function AdminDashboard() {
   const [active, setActive] = useState('home');
-  const [medicines, setMedicines] = useState(initialMedicines);
+  const [medicines, setMedicines] = useState([]);
   const [form, setForm] = useState({ name: '', category: '', price: '', stock: '' });
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Load medicines from API
+  const fetchMedicines = async () => {
+    try {
+      const data = await medicineService.getAllMedicines();
+      setMedicines(data);
+    } catch (error) {
+      console.error('Error fetching medicines:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMedicines();
+  }, []);
 
   // Live stats
   const totalMedicines = medicines.length;
@@ -31,14 +41,20 @@ export default function AdminDashboard() {
     setForm(f => ({ ...f, [name]: value }));
   };
 
-  const handleAddMedicine = e => {
+  const handleAddMedicine = async (e) => {
     e.preventDefault();
     if (!form.name || !form.category || !form.price || !form.stock) return;
-    setMedicines(meds => [
-      ...meds,
-      { ...form, id: Date.now(), price: parseFloat(form.price), stock: parseInt(form.stock) }
-    ]);
-    setForm({ name: '', category: '', price: '', stock: '' });
+    
+    setLoading(true);
+    try {
+      await medicineService.createMedicine(form);
+      await fetchMedicines(); // Refresh the list
+      setForm({ name: '', category: '', price: '', stock: '' });
+    } catch (error) {
+      alert(error.message || 'Failed to add medicine');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEdit = med => {
@@ -46,15 +62,30 @@ export default function AdminDashboard() {
     setForm({ name: med.name, category: med.category, price: med.price, stock: med.stock });
   };
 
-  const handleUpdateMedicine = e => {
+  const handleUpdateMedicine = async (e) => {
     e.preventDefault();
-    setMedicines(meds => meds.map(m => m.id === editingId ? { ...m, ...form, price: parseFloat(form.price), stock: parseInt(form.stock) } : m));
-    setEditingId(null);
-    setForm({ name: '', category: '', price: '', stock: '' });
+    setLoading(true);
+    try {
+      await medicineService.updateMedicine(editingId, form);
+      await fetchMedicines(); // Refresh the list
+      setEditingId(null);
+      setForm({ name: '', category: '', price: '', stock: '' });
+    } catch (error) {
+      alert(error.message || 'Failed to update medicine');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = id => {
-    setMedicines(meds => meds.filter(m => m.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this medicine?')) return;
+    
+    try {
+      await medicineService.deleteMedicine(id);
+      await fetchMedicines(); // Refresh the list
+    } catch (error) {
+      alert(error.message || 'Failed to delete medicine');
+    }
   };
 
   return (
@@ -110,7 +141,9 @@ export default function AdminDashboard() {
                 <input name="category" value={form.category} onChange={handleFormChange} placeholder="Category" required />
                 <input name="price" value={form.price} onChange={handleFormChange} placeholder="Price" type="number" min="0" step="0.01" required />
                 <input name="stock" value={form.stock} onChange={handleFormChange} placeholder="Stock" type="number" min="0" required />
-                <button type="submit">{editingId ? 'Update' : 'Add'}</button>
+                <button type="submit" disabled={loading}>
+                  {loading ? 'Processing...' : (editingId ? 'Update' : 'Add')}
+                </button>
                 {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ name: '', category: '', price: '', stock: '' }); }}>Cancel</button>}
               </form>
               <table className="medicine-table">
@@ -128,7 +161,7 @@ export default function AdminDashboard() {
                     <tr key={med.id}>
                       <td>{med.name}</td>
                       <td>{med.category}</td>
-                      <td>${med.price.toFixed(2)}</td>
+                      <td>${parseFloat(med.price).toFixed(2)}</td>
                       <td>{med.stock}</td>
                       <td>
                         <button onClick={() => handleEdit(med)}>Edit</button>
