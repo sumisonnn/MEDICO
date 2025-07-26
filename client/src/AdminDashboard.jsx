@@ -3,24 +3,21 @@ import './AdminDashboard.css';
 import Logout from './components/Logout';
 
 const sections = [
-  { key: 'dashboard', label: 'Dashboard' },
-  { key: 'medicines', label: 'Medicines' },
-  { key: 'users', label: 'Users' },
-  { key: 'inventory', label: 'Inventory' },
-  { key: 'sales', label: 'Sales Reports' },
-  { key: 'profile', label: 'Profile' },
+  { key: 'home', label: 'Home' },
+  { key: 'manage-medicine', label: 'Manage Medicine' },
+  { key: 'sales-history', label: 'Sales History' },
 ];
 
 const initialMedicines = [
-  { id: 1, name: 'Paracetamol', category: 'Pain Relief', price: 2.5, stock: 100, expiry: '2025-12-31' },
-  { id: 2, name: 'Amoxicillin', category: 'Antibiotic', price: 5.0, stock: 50, expiry: '2024-10-15' },
-  { id: 3, name: 'Cetirizine', category: 'Allergy', price: 1.5, stock: 8, expiry: '2024-08-01' },
+  { id: 1, name: 'Paracetamol', category: 'Pain Relief', price: 2.5, stock: 100 },
+  { id: 2, name: 'Amoxicillin', category: 'Antibiotic', price: 5.0, stock: 50 },
+  { id: 3, name: 'Cetirizine', category: 'Allergy', price: 1.5, stock: 8 },
 ];
 
 export default function AdminDashboard() {
-  const [active, setActive] = useState('dashboard');
+  const [active, setActive] = useState('home');
   const [medicines, setMedicines] = useState(initialMedicines);
-  const [form, setForm] = useState({ name: '', category: '', price: '', stock: '', expiry: '' });
+  const [form, setForm] = useState({ name: '', category: '', price: '', stock: '' });
   const [editingId, setEditingId] = useState(null);
 
   // Live stats
@@ -36,24 +33,24 @@ export default function AdminDashboard() {
 
   const handleAddMedicine = e => {
     e.preventDefault();
-    if (!form.name || !form.category || !form.price || !form.stock || !form.expiry) return;
+    if (!form.name || !form.category || !form.price || !form.stock) return;
     setMedicines(meds => [
       ...meds,
       { ...form, id: Date.now(), price: parseFloat(form.price), stock: parseInt(form.stock) }
     ]);
-    setForm({ name: '', category: '', price: '', stock: '', expiry: '' });
+    setForm({ name: '', category: '', price: '', stock: '' });
   };
 
   const handleEdit = med => {
     setEditingId(med.id);
-    setForm({ name: med.name, category: med.category, price: med.price, stock: med.stock, expiry: med.expiry });
+    setForm({ name: med.name, category: med.category, price: med.price, stock: med.stock });
   };
 
   const handleUpdateMedicine = e => {
     e.preventDefault();
     setMedicines(meds => meds.map(m => m.id === editingId ? { ...m, ...form, price: parseFloat(form.price), stock: parseInt(form.stock) } : m));
     setEditingId(null);
-    setForm({ name: '', category: '', price: '', stock: '', expiry: '' });
+    setForm({ name: '', category: '', price: '', stock: '' });
   };
 
   const handleDelete = id => {
@@ -69,7 +66,7 @@ export default function AdminDashboard() {
             <div
               key={s.key}
               className={"admin-nav-link" + (active === s.key ? " active" : "")}
-              onClick={() => { setActive(s.key); setEditingId(null); setForm({ name: '', category: '', price: '', stock: '', expiry: '' }); }}
+              onClick={() => { setActive(s.key); setEditingId(null); setForm({ name: '', category: '', price: '', stock: '' }); }}
             >
               {s.label}
             </div>
@@ -85,7 +82,7 @@ export default function AdminDashboard() {
           </div>
         </header>
         <main className="admin-main">
-          {active === 'dashboard' && (
+          {active === 'home' && (
             <div className="admin-section">
               <div className="admin-stats-row">
                 <div className="admin-stat-card">
@@ -105,17 +102,16 @@ export default function AdminDashboard() {
               <p>Overview and stats will appear here.</p>
             </div>
           )}
-          {active === 'medicines' && (
+          {active === 'manage-medicine' && (
             <div className="admin-section">
-              <h2>Medicines Management</h2>
+              <h2>Manage Medicine</h2>
               <form className="medicine-form" onSubmit={editingId ? handleUpdateMedicine : handleAddMedicine} style={{ marginBottom: 24 }}>
                 <input name="name" value={form.name} onChange={handleFormChange} placeholder="Name" required />
                 <input name="category" value={form.category} onChange={handleFormChange} placeholder="Category" required />
                 <input name="price" value={form.price} onChange={handleFormChange} placeholder="Price" type="number" min="0" step="0.01" required />
                 <input name="stock" value={form.stock} onChange={handleFormChange} placeholder="Stock" type="number" min="0" required />
-                <input name="expiry" value={form.expiry} onChange={handleFormChange} placeholder="Expiry Date" type="date" required />
                 <button type="submit">{editingId ? 'Update' : 'Add'}</button>
-                {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ name: '', category: '', price: '', stock: '', expiry: '' }); }}>Cancel</button>}
+                {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ name: '', category: '', price: '', stock: '' }); }}>Cancel</button>}
               </form>
               <table className="medicine-table">
                 <thead>
@@ -124,7 +120,6 @@ export default function AdminDashboard() {
                     <th>Category</th>
                     <th>Price</th>
                     <th>Stock</th>
-                    <th>Expiry</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -135,7 +130,6 @@ export default function AdminDashboard() {
                       <td>{med.category}</td>
                       <td>${med.price.toFixed(2)}</td>
                       <td>{med.stock}</td>
-                      <td>{med.expiry}</td>
                       <td>
                         <button onClick={() => handleEdit(med)}>Edit</button>
                         <button onClick={() => handleDelete(med.id)} style={{ marginLeft: 8, color: 'red' }}>Delete</button>
@@ -146,10 +140,16 @@ export default function AdminDashboard() {
               </table>
             </div>
           )}
-          {active === 'users' && <div className="admin-section"><h2>Users Management</h2><p>CRUD for users.</p></div>}
-          {active === 'inventory' && <div className="admin-section"><h2>Inventory Management</h2><p>Stock and alerts.</p></div>}
-          {active === 'sales' && <div className="admin-section"><h2>Sales Reports</h2><p>Analytics and reports.</p></div>}
-          {active === 'profile' && <div className="admin-section"><h2>Admin Profile</h2><p>Profile management.</p></div>}
+          {active === 'sales-history' && (
+            <div className="admin-section">
+              <h2>Sales History</h2>
+              <p>View and manage sales records and analytics.</p>
+              <div style={{ marginTop: 20 }}>
+                <h3>Recent Sales</h3>
+                <p>Sales data and reports will be displayed here.</p>
+              </div>
+            </div>
+          )}
         </main>
         <footer className="admin-footer">
           &copy; {new Date().getFullYear()} MEDICO Admin. All rights reserved.
