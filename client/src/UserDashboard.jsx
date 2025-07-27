@@ -9,6 +9,7 @@ const sections = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'browse', label: 'Browse Medicines' },
   { key: 'cart', label: 'Cart' },
+  { key: 'checkout', label: 'Checkout' },
   { key: 'orders', label: 'Orders' },
   { key: 'profile', label: 'Profile' },
 ];
@@ -49,11 +50,11 @@ export default function UserDashboard() {
   // Load cart from backend
   const fetchCart = async () => {
     try {
-      console.log('Fetching cart from backend...');
+      console.log('Fetching cart in UserDashboard...');
       const cartData = await cartService.getCart();
       console.log('Cart data received:', cartData);
       setCart(cartData.items || []);
-      console.log('Cart state updated with items:', cartData.items?.length || 0);
+      console.log('Cart state updated:', cartData.items || []);
     } catch (error) {
       console.error('Error fetching cart:', error);
       setCart([]);
@@ -77,12 +78,13 @@ export default function UserDashboard() {
 
   const addToCart = async (medicine) => {
     try {
-      console.log('Adding medicine to cart:', medicine.id, medicine.name);
       await cartService.addToCart(medicine.id, 1);
-      console.log('Successfully added to cart via API');
       
       // Refresh cart from backend
       await fetchCart();
+      
+      // Switch to cart tab to show the added item
+      setActive('cart');
       
       // Show popup notification
       setPopupMessage('Added to cart successfully!');
@@ -102,8 +104,6 @@ export default function UserDashboard() {
       }, 3000);
     }
   };
-
-
 
   const removeFromCart = async (medicineId) => {
     try {
@@ -129,16 +129,6 @@ export default function UserDashboard() {
 
   const getTotalPrice = () => {
     return cart.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
-  };
-
-  const clearCart = async () => {
-    try {
-      await cartService.clearCart();
-      setCart([]);
-      console.log('Cart cleared completely');
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-    }
   };
 
   return (
@@ -304,19 +294,166 @@ export default function UserDashboard() {
                       ))}
                     </tbody>
                   </table>
-                  <div className="cart-total">
-                    <h3>Total: Rs. {getTotalPrice().toFixed(2)}</h3>
-                    <div className="cart-actions">
-                      <button className="checkout-btn">
-                        Checkout
-                      </button>
-                      <button 
-                        onClick={clearCart}
-                        className="clear-cart-btn"
-                      >
-                        Clear Cart
-                      </button>
+                                      <div className="cart-total">
+                      <h3>Total: Rs. {getTotalPrice().toFixed(2)}</h3>
+                      <div className="cart-actions">
+                        <button 
+                          onClick={() => {
+                            if (cart.length === 0) {
+                              setPopupMessage('Your cart is empty!');
+                              setShowPopup(true);
+                              setTimeout(() => setShowPopup(false), 3000);
+                              return;
+                            }
+                            setPopupMessage(`Order placed successfully! Total: Rs. ${getTotalPrice().toFixed(2)}. Your order is being processed.`);
+                            setShowPopup(true);
+                            setTimeout(() => setShowPopup(false), 3000);
+                            // Clear cart after successful checkout
+                            cartService.clearCart().then(() => {
+                              fetchCart();
+                            });
+                          }}
+                          className="checkout-btn"
+                          disabled={cart.length === 0}
+                        >
+                          Checkout
+                        </button>
+                        <button 
+                          onClick={() => {
+                            cartService.clearCart().then(() => {
+                              fetchCart();
+                            });
+                          }}
+                          className="clear-cart-btn"
+                        >
+                          Clear Cart
+                        </button>
+                      </div>
                     </div>
+                </div>
+              )}
+            </div>
+          )}
+          {active === 'checkout' && (
+            <div className="user-section">
+              <h2>Checkout</h2>
+              {cart.length === 0 ? (
+                <div className="empty-state">
+                  <h3>Your cart is empty</h3>
+                  <p>Add some medicines to your cart before checkout.</p>
+                  <button 
+                    onClick={() => setActive('browse')}
+                    className="browse-btn"
+                  >
+                    Browse Medicines
+                  </button>
+                </div>
+              ) : (
+                <div className="checkout-container">
+                  <div className="order-summary">
+                    <h3>Order Summary</h3>
+                    <div className="order-items">
+                      {cart.map(item => (
+                        <div key={item.id} className="order-item">
+                          <div className="item-info">
+                            <h4>{item.name}</h4>
+                            <p>Category: {item.category}</p>
+                            <p>Quantity: {item.quantity}</p>
+                            <p>Price: Rs. {parseFloat(item.price).toFixed(2)} each</p>
+                          </div>
+                          <div className="item-total">
+                            <h4>Rs. {(parseFloat(item.price) * item.quantity).toFixed(2)}</h4>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="order-total">
+                      <h3>Total: Rs. {getTotalPrice().toFixed(2)}</h3>
+                    </div>
+                  </div>
+                  
+                  <div className="shipping-form">
+                    <h3>Shipping Information</h3>
+                    <form className="checkout-form">
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="firstName">First Name</label>
+                          <input type="text" id="firstName" required />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="lastName">Last Name</label>
+                          <input type="text" id="lastName" required />
+                        </div>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="email">Email</label>
+                        <input type="email" id="email" required />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="phone">Phone Number</label>
+                        <input type="tel" id="phone" required />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="address">Delivery Address</label>
+                        <textarea id="address" rows="3" required></textarea>
+                      </div>
+                      
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="city">City</label>
+                          <input type="text" id="city" required />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="postalCode">Postal Code</label>
+                          <input type="text" id="postalCode" required />
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  
+                  <div className="payment-section">
+                    <h3>Payment Method</h3>
+                    <div className="payment-options">
+                      <label className="payment-option">
+                        <input type="radio" name="payment" value="cod" defaultChecked />
+                        <span>Cash on Delivery</span>
+                      </label>
+                      <label className="payment-option">
+                        <input type="radio" name="payment" value="card" />
+                        <span>Credit/Debit Card</span>
+                      </label>
+                      <label className="payment-option">
+                        <input type="radio" name="payment" value="upi" />
+                        <span>UPI Payment</span>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div className="checkout-actions">
+                    <button 
+                      onClick={() => {
+                        setPopupMessage(`Order placed successfully! Total: Rs. ${getTotalPrice().toFixed(2)}. Your order is being processed.`);
+                        setShowPopup(true);
+                        setTimeout(() => setShowPopup(false), 3000);
+                        // Clear cart after successful checkout
+                        cartService.clearCart().then(() => {
+                          fetchCart();
+                          setActive('dashboard');
+                        });
+                      }}
+                      className="place-order-btn"
+                    >
+                      Place Order
+                    </button>
+                    <button 
+                      onClick={() => setActive('cart')}
+                      className="back-to-cart-btn"
+                    >
+                      Back to Cart
+                    </button>
                   </div>
                 </div>
               )}

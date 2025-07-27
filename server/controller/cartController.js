@@ -7,15 +7,12 @@ import { User } from '../models/User.js';
 export const getUserCart = async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log('Getting cart for user ID:', userId);
     
     // Find or create active cart for user
     let [cart, created] = await Cart.findOrCreate({
       where: { userId, status: 'active' },
       defaults: { userId, status: 'active' }
     });
-
-    console.log('Cart found/created:', cart.id, 'Created:', created);
 
     // Get cart items with medicine details
     const cartItems = await CartItem.findAll({
@@ -26,8 +23,6 @@ export const getUserCart = async (req, res) => {
       }],
       order: [['createdAt', 'ASC']]
     });
-
-    console.log('Cart items found:', cartItems.length);
 
     // Format response
     const formattedItems = cartItems.map(item => ({
@@ -48,7 +43,6 @@ export const getUserCart = async (req, res) => {
       totalPrice: formattedItems.reduce((sum, item) => sum + item.totalPrice, 0)
     };
 
-    console.log('Sending cart response:', response);
     res.json(response);
   } catch (error) {
     console.error('Error getting user cart:', error);
@@ -62,20 +56,14 @@ export const addToCart = async (req, res) => {
     const userId = req.user.id;
     const { medicineId, quantity = 1 } = req.body;
 
-    console.log('Adding to cart - User ID:', userId, 'Medicine ID:', medicineId, 'Quantity:', quantity);
-
     // Validate medicine exists
     const medicine = await Medicine.findByPk(medicineId);
     if (!medicine) {
-      console.log('Medicine not found:', medicineId);
       return res.status(404).json({ error: 'Medicine not found' });
     }
 
-    console.log('Medicine found:', medicine.name);
-
     // Check stock
     if (medicine.stock < quantity) {
-      console.log('Insufficient stock. Available:', medicine.stock, 'Requested:', quantity);
       return res.status(400).json({ error: 'Insufficient stock' });
     }
 
@@ -85,15 +73,12 @@ export const addToCart = async (req, res) => {
       defaults: { userId, status: 'active' }
     });
 
-    console.log('Cart found/created:', cart.id, 'Created:', created);
-
     // Check if item already exists in cart
     const existingItem = await CartItem.findOne({
       where: { cartId: cart.id, medicineId }
     });
 
     if (existingItem) {
-      console.log('Updating existing cart item');
       // Update quantity
       const newQuantity = existingItem.quantity + quantity;
       if (medicine.stock < newQuantity) {
@@ -104,9 +89,7 @@ export const addToCart = async (req, res) => {
         quantity: newQuantity,
         price: medicine.price
       });
-      console.log('Updated quantity to:', newQuantity);
     } else {
-      console.log('Creating new cart item');
       // Add new item
       await CartItem.create({
         cartId: cart.id,
@@ -114,10 +97,8 @@ export const addToCart = async (req, res) => {
         quantity,
         price: medicine.price
       });
-      console.log('Created new cart item');
     }
 
-    console.log('Item added to cart successfully');
     res.json({ message: 'Item added to cart successfully' });
   } catch (error) {
     console.error('Error adding to cart:', error);

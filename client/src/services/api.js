@@ -4,7 +4,7 @@ const API_BASE = 'http://localhost:5000/api';
 const apiCall = async (endpoint, options = {}) => {
   const url = `${API_BASE}${endpoint}`;
   
-  // Get auth token from localStorage
+  // Get token from localStorage
   const token = localStorage.getItem('token');
   
   const config = {
@@ -35,7 +35,7 @@ const apiCall = async (endpoint, options = {}) => {
 const apiCallFormData = async (endpoint, formData, method = 'POST') => {
   const url = `${API_BASE}${endpoint}`;
   
-  // Get auth token from localStorage
+  // Get token from localStorage
   const token = localStorage.getItem('token');
   
   const config = {

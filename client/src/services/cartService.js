@@ -4,7 +4,9 @@ export const cartService = {
   // Get user's cart
   async getCart() {
     try {
+      console.log('Fetching cart...');
       const response = await api.get('/cart');
+      console.log('Cart response:', response);
       return response;
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -15,7 +17,9 @@ export const cartService = {
   // Add item to cart
   async addToCart(medicineId, quantity = 1) {
     try {
+      console.log('Adding to cart:', { medicineId, quantity });
       const response = await api.post('/cart/add', { medicineId, quantity });
+      console.log('Add to cart response:', response);
       return response;
     } catch (error) {
       console.error('Error adding to cart:', error);
