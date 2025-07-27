@@ -7,7 +7,7 @@ import orderService from './services/orderService.js';
 import logoIcon from './assets/logo.png';
 
 const sections = [
-  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'dashboard', label: 'Home' },
   { key: 'browse', label: 'Browse Medicines' },
   { key: 'cart', label: 'Cart' },
   { key: 'checkout', label: 'Checkout' },
@@ -37,6 +37,19 @@ export default function UserDashboard() {
     address: '',
     city: '',
     postalCode: ''
+  });
+
+  // Profile state
+  const [profile, setProfile] = useState({
+    username: '',
+    email: '',
+    phone: ''
+  });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    username: '',
+    email: '',
+    phone: ''
   });
 
   useEffect(() => {
@@ -81,7 +94,8 @@ export default function UserDashboard() {
       try {
         await Promise.all([
           fetchCart(),
-          fetchOrders()
+          fetchOrders(),
+          fetchProfile()
         ]);
       } catch (error) {
         console.error('Error initializing dashboard:', error);
@@ -97,6 +111,13 @@ export default function UserDashboard() {
   useEffect(() => {
     if (active === 'orders') {
       fetchOrders();
+    }
+  }, [active]);
+
+  // Fetch profile when profile tab is activated
+  useEffect(() => {
+    if (active === 'profile') {
+      fetchProfile();
     }
   }, [active]);
 
@@ -187,6 +208,64 @@ export default function UserDashboard() {
     });
   };
 
+  // Profile functions
+  const fetchProfile = async () => {
+    try {
+      // Get user info from localStorage or API
+      const userInfo = JSON.parse(localStorage.getItem('user'));
+      if (userInfo) {
+        setProfile({
+          username: userInfo.username || '',
+          email: userInfo.email || '',
+          phone: userInfo.phone || ''
+        });
+        setProfileForm({
+          username: userInfo.username || '',
+          email: userInfo.email || '',
+          phone: userInfo.phone || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  const handleProfileFormChange = (e) => {
+    setProfileForm({
+      ...profileForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleEditProfile = () => {
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      // Update profile logic here
+      setProfile(profileForm);
+      setIsEditingProfile(false);
+      setPopupMessage('Profile updated successfully!');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setPopupMessage('Failed to update profile');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setProfileForm({
+      username: profile.username,
+      email: profile.email,
+      phone: profile.phone
+    });
+    setIsEditingProfile(false);
+  };
+
   const handlePlaceOrder = async () => {
     try {
       // Validate form
@@ -265,9 +344,11 @@ export default function UserDashboard() {
       </aside>
       <div className="user-content-area">
         <header className="user-header">
-          <div className="user-header-title">User Dashboard</div>
+          <div className="user-header-title">
+            Welcome, {profile.username || 'User'}
+          </div>
           <div className="user-header-profile">
-            👤 User
+            👤 {profile.username || 'User'}
             <Logout />
           </div>
         </header>
@@ -715,7 +796,95 @@ export default function UserDashboard() {
               )}
             </div>
           )}
-          {active === 'profile' && <div className="user-section"><h2>User Profile</h2><p>Profile management.</p></div>}
+          {active === 'profile' && (
+            <div className="user-section">
+              <div className="profile-container">
+                <div className="profile-header">
+                  <h2>User Profile</h2>
+                  <p>Manage your account information</p>
+                </div>
+                
+                <div className="profile-form">
+                  <div className="form-group">
+                    <label htmlFor="username">Username</label>
+                    {isEditingProfile ? (
+                      <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={profileForm.username}
+                        onChange={handleProfileFormChange}
+                        className="form-input"
+                        placeholder="Enter username"
+                      />
+                    ) : (
+                      <div className="profile-value">{profile.username || 'Not set'}</div>
+                    )}
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    {isEditingProfile ? (
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={profileForm.email}
+                        onChange={handleProfileFormChange}
+                        className="form-input"
+                        placeholder="Enter email"
+                      />
+                    ) : (
+                      <div className="profile-value">{profile.email || 'Not set'}</div>
+                    )}
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="phone">Phone Number</label>
+                    {isEditingProfile ? (
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={profileForm.phone}
+                        onChange={handleProfileFormChange}
+                        className="form-input"
+                        placeholder="Enter phone number"
+                      />
+                    ) : (
+                      <div className="profile-value">{profile.phone || 'Not set'}</div>
+                    )}
+                  </div>
+                  
+                  <div className="profile-actions">
+                    {isEditingProfile ? (
+                      <>
+                        <button 
+                          onClick={handleSaveProfile}
+                          className="profile-btn primary"
+                        >
+                          Save Changes
+                        </button>
+                        <button 
+                          onClick={handleCancelEdit}
+                          className="profile-btn secondary"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button 
+                        onClick={handleEditProfile}
+                        className="profile-btn primary"
+                      >
+                        Edit Profile
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
       
