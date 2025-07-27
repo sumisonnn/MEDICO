@@ -1,0 +1,35 @@
+import api from './api.js';
+
+export const orderService = {
+  async createOrder(orderData) {
+    try {
+      const response = await api.post('/orders/create', orderData);
+      return response;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      throw error;
+    }
+  },
+
+  async getUserOrders() {
+    try {
+      const response = await api.get('/orders');
+      return response;
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      throw error;
+    }
+  },
+
+  async getOrderById(orderId) {
+    try {
+      const response = await api.get(`/orders/${orderId}`);
+      return response;
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      throw error;
+    }
+  }
+};
+
+export default orderService; 

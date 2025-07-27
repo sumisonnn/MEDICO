@@ -3,6 +3,7 @@ import './UserDashboard.css';
 import Logout from './components/Logout';
 import medicineService from './services/medicineService.js';
 import cartService from './services/cartService.js';
+import orderService from './services/orderService.js';
 import logoIcon from './assets/logo.png';
 
 const sections = [
@@ -24,6 +25,18 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [checkoutForm, setCheckoutForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: ''
+  });
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -64,6 +77,27 @@ export default function UserDashboard() {
   useEffect(() => {
     fetchCart();
   }, []);
+
+  // Fetch orders when orders tab is activated
+  useEffect(() => {
+    if (active === 'orders') {
+      fetchOrders();
+    }
+  }, [active]);
+
+  // Load orders from API
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const data = await orderService.getUserOrders();
+      setOrders(data.orders || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrders([]);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
 
   // Filter medicines based on search and category
   const filteredMedicines = medicines.filter(med => {
@@ -129,6 +163,70 @@ export default function UserDashboard() {
 
   const getTotalPrice = () => {
     return cart.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
+  };
+
+  const handleCheckoutFormChange = (e) => {
+    setCheckoutForm({
+      ...checkoutForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handlePlaceOrder = async () => {
+    try {
+      // Validate form
+      if (!checkoutForm.firstName || !checkoutForm.lastName || !checkoutForm.email || 
+          !checkoutForm.phone || !checkoutForm.address || !checkoutForm.city || !checkoutForm.postalCode) {
+        setPopupMessage('Please fill in all delivery information');
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 3000);
+        return;
+      }
+
+      // Create order data
+      const orderData = {
+        deliveryAddress: `${checkoutForm.firstName} ${checkoutForm.lastName}\n${checkoutForm.address}\n${checkoutForm.city}, ${checkoutForm.postalCode}`,
+        deliveryPhone: checkoutForm.phone,
+        deliveryEmail: checkoutForm.email
+      };
+
+      // Create order
+      await orderService.createOrder(orderData);
+      
+      // Clear cart
+      await cartService.clearCart();
+      
+      // Refresh cart, orders, and medicines
+      await fetchCart();
+      await fetchOrders();
+      await fetchMedicines();
+      
+      // Reset form
+      setCheckoutForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        postalCode: ''
+      });
+      
+      // Show success message
+      setPopupMessage(`Order placed successfully! Total: Rs. ${getTotalPrice().toFixed(2)}`);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      
+      // Reset checkout state and go to orders
+      setShowCheckout(false);
+      setActive('orders');
+      
+    } catch (error) {
+      console.error('Error placing order:', error);
+      setPopupMessage(error.response?.data?.error || 'Failed to place order');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+    }
   };
 
   return (
@@ -305,13 +403,8 @@ export default function UserDashboard() {
                               setTimeout(() => setShowPopup(false), 3000);
                               return;
                             }
-                            setPopupMessage(`Order placed successfully! Total: Rs. ${getTotalPrice().toFixed(2)}. Your order is being processed.`);
-                            setShowPopup(true);
-                            setTimeout(() => setShowPopup(false), 3000);
-                            // Clear cart after successful checkout
-                            cartService.clearCart().then(() => {
-                              fetchCart();
-                            });
+                            setShowCheckout(true);
+                            setActive('checkout');
                           }}
                           className="checkout-btn"
                           disabled={cart.length === 0}
@@ -337,7 +430,19 @@ export default function UserDashboard() {
           {active === 'checkout' && (
             <div className="user-section">
               <h2>Checkout</h2>
-              {cart.length === 0 ? (
+              
+              {!showCheckout ? (
+                <div className="empty-state">
+                  <h3>Access Checkout</h3>
+                  <p>Please go to your cart and click the "Checkout" button to proceed with your order.</p>
+                  <button 
+                    onClick={() => setActive('cart')}
+                    className="browse-btn"
+                  >
+                    Go to Cart
+                  </button>
+                </div>
+              ) : cart.length === 0 ? (
                 <div className="empty-state">
                   <h3>Your cart is empty</h3>
                   <p>Add some medicines to your cart before checkout.</p>
@@ -349,117 +454,191 @@ export default function UserDashboard() {
                   </button>
                 </div>
               ) : (
-                <div className="checkout-container">
-                  <div className="order-summary">
+                <div className="simple-checkout">
+                  <div className="order-summary-simple">
                     <h3>Order Summary</h3>
-                    <div className="order-items">
+                    <div className="cart-items-simple">
                       {cart.map(item => (
-                        <div key={item.id} className="order-item">
-                          <div className="item-info">
+                        <div key={item.id} className="cart-item-simple">
+                          <div className="item-details-simple">
                             <h4>{item.name}</h4>
-                            <p>Category: {item.category}</p>
-                            <p>Quantity: {item.quantity}</p>
-                            <p>Price: Rs. {parseFloat(item.price).toFixed(2)} each</p>
+                            <p>Qty: {item.quantity} × Rs. {parseFloat(item.price).toFixed(2)}</p>
                           </div>
-                          <div className="item-total">
-                            <h4>Rs. {(parseFloat(item.price) * item.quantity).toFixed(2)}</h4>
+                          <div className="item-total-simple">
+                            Rs. {(parseFloat(item.price) * item.quantity).toFixed(2)}
                           </div>
                         </div>
                       ))}
                     </div>
-                    <div className="order-total">
-                      <h3>Total: Rs. {getTotalPrice().toFixed(2)}</h3>
+                    <div className="total-simple">
+                      <strong>Total: Rs. {getTotalPrice().toFixed(2)}</strong>
                     </div>
                   </div>
                   
-                  <div className="shipping-form">
-                    <h3>Shipping Information</h3>
-                    <form className="checkout-form">
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="firstName">First Name</label>
-                          <input type="text" id="firstName" required />
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="lastName">Last Name</label>
-                          <input type="text" id="lastName" required />
-                        </div>
+                  <div className="checkout-form-simple">
+                    <h3>Delivery Information</h3>
+                    <form>
+                      <div className="form-row-simple">
+                        <input 
+                          type="text" 
+                          name="firstName"
+                          placeholder="First Name" 
+                          value={checkoutForm.firstName}
+                          onChange={handleCheckoutFormChange}
+                          required 
+                        />
+                        <input 
+                          type="text" 
+                          name="lastName"
+                          placeholder="Last Name" 
+                          value={checkoutForm.lastName}
+                          onChange={handleCheckoutFormChange}
+                          required 
+                        />
                       </div>
-                      
-                      <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <input type="email" id="email" required />
-                      </div>
-                      
-                      <div className="form-group">
-                        <label htmlFor="phone">Phone Number</label>
-                        <input type="tel" id="phone" required />
-                      </div>
-                      
-                      <div className="form-group">
-                        <label htmlFor="address">Delivery Address</label>
-                        <textarea id="address" rows="3" required></textarea>
-                      </div>
-                      
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="city">City</label>
-                          <input type="text" id="city" required />
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="postalCode">Postal Code</label>
-                          <input type="text" id="postalCode" required />
-                        </div>
+                      <input 
+                        type="email" 
+                        name="email"
+                        placeholder="Email" 
+                        value={checkoutForm.email}
+                        onChange={handleCheckoutFormChange}
+                        required 
+                      />
+                      <input 
+                        type="tel" 
+                        name="phone"
+                        placeholder="Phone Number" 
+                        value={checkoutForm.phone}
+                        onChange={handleCheckoutFormChange}
+                        required 
+                      />
+                      <textarea 
+                        name="address"
+                        placeholder="Delivery Address" 
+                        rows="3" 
+                        value={checkoutForm.address}
+                        onChange={handleCheckoutFormChange}
+                        required
+                      ></textarea>
+                      <div className="form-row-simple">
+                        <input 
+                          type="text" 
+                          name="city"
+                          placeholder="City" 
+                          value={checkoutForm.city}
+                          onChange={handleCheckoutFormChange}
+                          required 
+                        />
+                        <input 
+                          type="text" 
+                          name="postalCode"
+                          placeholder="Postal Code" 
+                          value={checkoutForm.postalCode}
+                          onChange={handleCheckoutFormChange}
+                          required 
+                        />
                       </div>
                     </form>
-                  </div>
-                  
-                  <div className="payment-section">
-                    <h3>Payment Method</h3>
-                    <div className="payment-options">
-                      <label className="payment-option">
-                        <input type="radio" name="payment" value="cod" defaultChecked />
-                        <span>Cash on Delivery</span>
-                      </label>
-                      <label className="payment-option">
-                        <input type="radio" name="payment" value="card" />
-                        <span>Credit/Debit Card</span>
-                      </label>
-                      <label className="payment-option">
-                        <input type="radio" name="payment" value="upi" />
-                        <span>UPI Payment</span>
-                      </label>
+                    
+                    <div className="payment-simple">
+                      <h3>Payment Method</h3>
+                      <div className="payment-options-simple">
+                        <label>
+                          <input type="radio" name="payment" value="cod" defaultChecked />
+                          Cash on Delivery
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="checkout-actions">
-                    <button 
-                      onClick={() => {
-                        setPopupMessage(`Order placed successfully! Total: Rs. ${getTotalPrice().toFixed(2)}. Your order is being processed.`);
-                        setShowPopup(true);
-                        setTimeout(() => setShowPopup(false), 3000);
-                        // Clear cart after successful checkout
-                        cartService.clearCart().then(() => {
-                          fetchCart();
-                          setActive('dashboard');
-                        });
-                      }}
-                      className="place-order-btn"
-                    >
-                      Place Order
-                    </button>
-                    <button 
-                      onClick={() => setActive('cart')}
-                      className="back-to-cart-btn"
-                    >
-                      Back to Cart
-                    </button>
+                    
+                    <div className="checkout-actions-simple">
+                      <button 
+                        onClick={handlePlaceOrder}
+                        className="place-order-btn-simple"
+                      >
+                        Place Order
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setShowCheckout(false);
+                          setActive('cart');
+                        }}
+                        className="back-btn-simple"
+                      >
+                        Back to Cart
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
           )}
-          {active === 'orders' && <div className="user-section"><h2>Your Orders</h2><p>Order history and status.</p></div>}
+          {active === 'orders' && (
+            <div className="user-section">
+              <h2>Your Orders</h2>
+              {loadingOrders ? (
+                <div className="loading-state">
+                  <p>Loading orders...</p>
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="empty-state">
+                  <h3>No orders yet</h3>
+                  <p>You haven't placed any orders yet. Start shopping to see your order history here.</p>
+                  <button onClick={() => setActive('browse')} className="browse-btn">
+                    Browse Medicines
+                  </button>
+                </div>
+              ) : (
+                <div className="orders-container">
+                  {orders.map(order => (
+                    <div key={order.id} className="order-card">
+                      <div className="order-header">
+                        <div className="order-info">
+                          <h3>Order #{order.orderNumber}</h3>
+                          <p className="order-date">
+                            {new Date(order.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          <span className={`order-status order-status-${order.status}`}>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </span>
+                        </div>
+                        <div className="order-total">
+                          <strong>Rs. {parseFloat(order.totalAmount).toFixed(2)}</strong>
+                        </div>
+                      </div>
+                      
+                      <div className="order-items">
+                        {order.OrderItems && order.OrderItems.map(item => (
+                          <div key={item.id} className="order-item">
+                            <div className="item-info">
+                              <h4>{item.Medicine ? item.Medicine.name : 'Unknown Medicine'}</h4>
+                              <p>Qty: {item.quantity} × Rs. {parseFloat(item.price).toFixed(2)}</p>
+                            </div>
+                            <div className="item-total">
+                              Rs. {(parseFloat(item.price) * item.quantity).toFixed(2)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="order-delivery">
+                        <h4>Delivery Information</h4>
+                        <p><strong>Address:</strong> {order.deliveryAddress}</p>
+                        <p><strong>Phone:</strong> {order.deliveryPhone}</p>
+                        <p><strong>Email:</strong> {order.deliveryEmail}</p>
+                        <p><strong>Payment:</strong> {order.paymentMethod}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {active === 'profile' && <div className="user-section"><h2>User Profile</h2><p>Profile management.</p></div>}
         </main>
       </div>
