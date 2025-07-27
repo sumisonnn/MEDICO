@@ -8,7 +8,6 @@ import logoIcon from './assets/logo.png';
 
 const sections = [
   { key: 'dashboard', label: 'Home' },
-  { key: 'browse', label: 'Browse Medicines' },
   { key: 'cart', label: 'Cart' },
   { key: 'checkout', label: 'Checkout' },
   { key: 'orders', label: 'Orders' },
@@ -17,14 +16,11 @@ const sections = [
 
 export default function UserDashboard() {
   const [active, setActive] = useState('dashboard');
-  const [now, setNow] = useState(new Date());
   const [medicines, setMedicines] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState('');
   const [showCheckout, setShowCheckout] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -58,11 +54,6 @@ export default function UserDashboard() {
   const showSlide = (index) => {
     setCurrentSlide(index);
   };
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Load medicines from API
   const fetchMedicines = async () => {
@@ -164,21 +155,11 @@ export default function UserDashboard() {
       setActive('cart');
       
       // Show popup notification
-      setPopupMessage('Added to cart successfully!');
-      setShowPopup(true);
+      alert('Added to cart successfully!');
       
-      // Hide popup after 3 seconds
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 3000);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      setPopupMessage(error.response?.data?.error || 'Failed to add to cart');
-      setShowPopup(true);
-      
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 3000);
+      alert(error.response?.data?.error || 'Failed to add to cart');
     }
   };
 
@@ -253,14 +234,10 @@ export default function UserDashboard() {
       // Update profile logic here
       setProfile(profileForm);
       setIsEditingProfile(false);
-      setPopupMessage('Profile updated successfully!');
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
+      alert('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      setPopupMessage('Failed to update profile');
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
+      alert('Failed to update profile');
     }
   };
 
@@ -278,9 +255,7 @@ export default function UserDashboard() {
       // Validate form
       if (!checkoutForm.firstName || !checkoutForm.lastName || !checkoutForm.email || 
           !checkoutForm.phone || !checkoutForm.address || !checkoutForm.city || !checkoutForm.postalCode) {
-        setPopupMessage('Please fill in all delivery information');
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 3000);
+        alert('Please fill in all delivery information');
         return;
       }
 
@@ -314,9 +289,7 @@ export default function UserDashboard() {
       });
       
       // Show success message
-      setPopupMessage(`Order placed successfully! Total: Rs. ${getTotalPrice().toFixed(2)}`);
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
+      alert(`Order placed successfully! Total: Rs. ${getTotalPrice().toFixed(2)}`);
       
       // Reset checkout state and go to orders
       setShowCheckout(false);
@@ -324,9 +297,7 @@ export default function UserDashboard() {
       
     } catch (error) {
       console.error('Error placing order:', error);
-      setPopupMessage(error.response?.data?.error || 'Failed to place order');
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
+      alert(error.response?.data?.error || 'Failed to place order');
     }
   };
 
@@ -415,98 +386,83 @@ export default function UserDashboard() {
                   </div>
                 </div>
                 
-                <div className="quick-stats">
-                  <div className="stat-item">
-                    <span className="stat-number">{medicines ? medicines.length : 0}</span>
-                    <span className="stat-label">Available Medicines</span>
+                {/* Browse Medicines Section */}
+                <div className="browse-medicines-home">
+                  <h2>Browse Medicines</h2>
+                  <div className="search-filter-container">
+                    <input
+                      type="text"
+                      placeholder="Search medicines..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="category-select"
+                    >
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>
+                          {cat === 'all' ? 'All Categories' : cat}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="stat-item">
-                    <span className="stat-number">{cart ? cart.length : 0}</span>
-                    <span className="stat-label">Cart Items</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-number">{orders ? orders.length : 0}</span>
-                    <span className="stat-label">Total Orders</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          {active === 'browse' && (
-            <div className="user-section">
-              <h2>Browse Medicines</h2>
-              <div className="search-filter-container">
-                <input
-                  type="text"
-                  placeholder="Search medicines..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
-                />
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="category-select"
-                >
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>
-                      {cat === 'all' ? 'All Categories' : cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {loading ? (
-                <div className="loading-state">Loading medicines...</div>
-              ) : (
-                <div className="medicine-grid">
-                  {filteredMedicines.map(medicine => (
-                    <div key={medicine.id} className="medicine-card">
-                      {/* Medicine Image */}
-                      <div>
-                        {medicine.image ? (
-                          <img 
-                            src={`http://localhost:5000${medicine.image}`} 
-                            alt={medicine.name}
-                            className="medicine-image"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.nextSibling.style.display = 'flex';
-                            }} 
-                          />
-                        ) : null}
-                        <div 
-                          className="medicine-image-placeholder"
-                          style={{ display: medicine.image ? 'none' : 'flex' }}
-                        >
-                          {medicine.image ? 'Loading...' : 'No Image'}
+                  {loading ? (
+                    <div className="loading-state">Loading medicines...</div>
+                  ) : (
+                    <div className="medicine-grid">
+                      {filteredMedicines.map(medicine => (
+                        <div key={medicine.id} className="medicine-card">
+                          {/* Medicine Image */}
+                          <div>
+                            {medicine.image ? (
+                              <img 
+                                src={`http://localhost:5000${medicine.image}`} 
+                                alt={medicine.name}
+                                className="medicine-image"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }} 
+                              />
+                            ) : null}
+                            <div 
+                              className="medicine-image-placeholder"
+                              style={{ display: medicine.image ? 'none' : 'flex' }}
+                            >
+                              {medicine.image ? 'Loading...' : 'No Image'}
+                            </div>
                           </div>
-                      </div>
-                      
-                      <div className="medicine-content">
-                        <h3 className="medicine-name">{medicine.name}</h3>
-                        <p className="medicine-category">Category: {medicine.category}</p>
-                        <p className="medicine-price">Rs {parseFloat(medicine.price).toFixed(2)}</p>
-                        <p className={`medicine-stock ${medicine.stock === 0 ? 'out-of-stock' : medicine.stock < 10 ? 'low-stock' : 'in-stock'}`}>
-                          Stock: {medicine.stock} {medicine.stock < 10 && medicine.stock > 0 && '(Low Stock)'}
-                      </p>
-                      <button
-                        onClick={() => addToCart(medicine)}
-                        disabled={medicine.stock === 0}
-                          className="add-to-cart-btn"
-                      >
-                        {medicine.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-                      </button>
-                      </div>
+                          
+                          <div className="medicine-content">
+                            <h3 className="medicine-name">{medicine.name}</h3>
+                            <p className="medicine-category">Category: {medicine.category}</p>
+                            <p className="medicine-price">Rs {parseFloat(medicine.price).toFixed(2)}</p>
+                            <p className={`medicine-stock ${medicine.stock === 0 ? 'out-of-stock' : medicine.stock < 10 ? 'low-stock' : 'in-stock'}`}>
+                              Stock: {medicine.stock} {medicine.stock < 10 && medicine.stock > 0 && '(Low Stock)'}
+                            </p>
+                            <button
+                              onClick={() => addToCart(medicine)}
+                              disabled={medicine.stock === 0}
+                              className="add-to-cart-btn"
+                            >
+                              {medicine.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                  {!loading && filteredMedicines.length === 0 && (
+                    <div className="empty-state">
+                      <h3>No medicines found</h3>
+                      <p>No medicines found matching your search criteria.</p>
+                    </div>
+                  )}
                 </div>
-              )}
-              {!loading && filteredMedicines.length === 0 && (
-                <div className="empty-state">
-                  <h3>No medicines found</h3>
-                  <p>No medicines found matching your search criteria.</p>
-                </div>
-              )}
+              </div>
             </div>
           )}
           {active === 'cart' && (
@@ -562,9 +518,7 @@ export default function UserDashboard() {
                     <button
                           onClick={() => {
                             if (cart.length === 0) {
-                              setPopupMessage('Your cart is empty!');
-                              setShowPopup(true);
-                              setTimeout(() => setShowPopup(false), 3000);
+                              alert('Your cart is empty!');
                               return;
                             }
                             setShowCheckout(true);
@@ -896,14 +850,7 @@ export default function UserDashboard() {
       </div>
       
       {/* Popup Notification */}
-      {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-notification">
-            <div className="popup-icon">✓</div>
-            <div className="popup-message">{popupMessage}</div>
-          </div>
-        </div>
-      )}
+      {/* Removed popup notification */}
     </div>
   );
 } 

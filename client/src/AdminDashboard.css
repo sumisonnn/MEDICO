@@ -183,11 +183,13 @@ body {
 
 .image-carousel {
   position: relative;
-  width: 100%;
-  height: 300px;
+  width: 1240px;
+  height: 430px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  background: #000;
 }
 
 .carousel-container {
@@ -197,6 +199,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .carousel-image {
@@ -206,8 +209,11 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
+  background: linear-gradient(135deg, #f7fafc 0%, #e2e8f0 100%);
+  border-radius: 12px;
 }
 
 .carousel-image.active {
@@ -647,13 +653,43 @@ body {
 }
 
 /* Carousel Responsive Design */
+@media (max-width: 1280px) {
+  .image-carousel {
+    width: 100%;
+    max-width: 1240px;
+    height: auto;
+    aspect-ratio: 1240 / 430;
+  }
+  
+  .carousel-container {
+    height: auto;
+    aspect-ratio: 1240 / 430;
+  }
+}
+
+@media (max-width: 1024px) {
+  .image-carousel {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1240 / 430;
+  }
+  
+  .carousel-container {
+    height: auto;
+    aspect-ratio: 1240 / 430;
+  }
+}
+
 @media (max-width: 768px) {
   .carousel-container {
-    height: 200px;
+    height: auto;
+    aspect-ratio: 1240 / 430;
   }
   
   .image-carousel {
-    height: 200px;
+    height: auto;
+    aspect-ratio: 1240 / 430;
   }
   
   .carousel-dots {
@@ -677,6 +713,18 @@ body {
   
   .carousel-btn-right {
     right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-container {
+    height: auto;
+    aspect-ratio: 1240 / 430;
+  }
+  
+  .image-carousel {
+    height: auto;
+    aspect-ratio: 1240 / 430;
   }
 }
 

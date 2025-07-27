@@ -4,6 +4,9 @@ import Logout from './components/Logout';
 import medicineService from './services/medicineService.js';
 import orderService from './services/orderService.js';
 import logoIcon from './assets/MEDICOOO.jpg';
+import whyImage from './assets/why.png';
+import ok2Image from './assets/ok2.jpg';
+import bannerImage from './assets/banner.jpg';
 
 const sections = [
   { key: 'home', label: 'Home' },
@@ -16,7 +19,6 @@ export default function AdminDashboard() {
   const [medicines, setMedicines] = useState([]);
   const [form, setForm] = useState({ name: '', category: '', price: '', stock: '' });
   const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -78,19 +80,12 @@ export default function AdminDashboard() {
     const file = e.target.files[0];
     if (file) {
       setSelectedImage(file);
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
   const clearForm = () => {
     setForm({ name: '', category: '', price: '', stock: '' });
     setSelectedImage(null);
-    setImagePreview(null);
     setEditingId(null);
   };
 
@@ -121,8 +116,6 @@ export default function AdminDashboard() {
   const handleEdit = med => {
     setEditingId(med.id);
     setForm({ name: med.name, category: med.category, price: med.price, stock: med.stock });
-    setImagePreview(med.image ? `http://localhost:5000${med.image}` : null);
-    setSelectedImage(null);
   };
 
   const handleUpdateMedicine = async (e) => {
@@ -189,17 +182,17 @@ export default function AdminDashboard() {
                 <div className="image-carousel">
                   <div className="carousel-container">
                     <img 
-                      src="/src/assets/why.png" 
+                      src={whyImage} 
                       alt="Banner 1" 
                       className={`carousel-image ${currentSlide === 0 ? 'active' : ''}`} 
                     />
                     <img 
-                      src="/src/assets/ok2.jpg" 
+                      src={ok2Image} 
                       alt="Banner 2" 
                       className={`carousel-image ${currentSlide === 1 ? 'active' : ''}`} 
                     />
                     <img 
-                      src="/src/assets/why.png" 
+                      src={bannerImage} 
                       alt="Banner 3" 
                       className={`carousel-image ${currentSlide === 2 ? 'active' : ''}`} 
                     />
@@ -281,20 +274,6 @@ export default function AdminDashboard() {
                     onChange={handleImageChange}
                     style={{ marginBottom: '8px' }}
                   />
-                  {imagePreview && (
-                    <div style={{ marginTop: '8px' }}>
-                      <img 
-                        src={imagePreview} 
-                        alt="Preview" 
-                        style={{ 
-                          maxWidth: '200px', 
-                          maxHeight: '200px', 
-                          border: '1px solid #ddd',
-                          borderRadius: '4px'
-                        }} 
-                      />
-                    </div>
-                  )}
                 </div>
                 
                 <div style={{ marginTop: '16px' }}>
