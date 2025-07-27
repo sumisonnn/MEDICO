@@ -388,7 +388,7 @@ export default function UserDashboard() {
                 
                 {/* Browse Medicines Section */}
                 <div className="browse-medicines-home">
-                  <h2>Browse Medicines</h2>
+                  <h2>MEDICINES</h2>
                   <div className="search-filter-container">
                     <input
                       type="text"
