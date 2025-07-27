@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import './UserDashboard.css';
 import Logout from './components/Logout';
 import medicineService from './services/medicineService.js';
+import cartService from './services/cartService.js';
+import logoIcon from './assets/logo.png';
 
 const sections = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -19,6 +21,8 @@ export default function UserDashboard() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -42,18 +46,23 @@ export default function UserDashboard() {
     fetchMedicines();
   }, []);
 
-  // Load cart from localStorage
-  useEffect(() => {
-    const savedCart = localStorage.getItem('userCart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
+  // Load cart from backend
+  const fetchCart = async () => {
+    try {
+      console.log('Fetching cart from backend...');
+      const cartData = await cartService.getCart();
+      console.log('Cart data received:', cartData);
+      setCart(cartData.items || []);
+      console.log('Cart state updated with items:', cartData.items?.length || 0);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      setCart([]);
     }
-  }, []);
+  };
 
-  // Save cart to localStorage whenever cart changes
   useEffect(() => {
-    localStorage.setItem('userCart', JSON.stringify(cart));
-  }, [cart]);
+    fetchCart();
+  }, []);
 
   // Filter medicines based on search and category
   const filteredMedicines = medicines.filter(med => {
@@ -66,32 +75,55 @@ export default function UserDashboard() {
   // Get unique categories for filter
   const categories = ['all', ...new Set(medicines.map(med => med.category))];
 
-  const addToCart = (medicine) => {
-    const existingItem = cart.find(item => item.id === medicine.id);
-    if (existingItem) {
-      setCart(cart.map(item => 
-        item.id === medicine.id 
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...medicine, quantity: 1 }]);
+  const addToCart = async (medicine) => {
+    try {
+      console.log('Adding medicine to cart:', medicine.id, medicine.name);
+      await cartService.addToCart(medicine.id, 1);
+      console.log('Successfully added to cart via API');
+      
+      // Refresh cart from backend
+      await fetchCart();
+      
+      // Show popup notification
+      setPopupMessage('Added to cart successfully!');
+      setShowPopup(true);
+      
+      // Hide popup after 3 seconds
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      setPopupMessage(error.response?.data?.error || 'Failed to add to cart');
+      setShowPopup(true);
+      
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
     }
   };
 
-  const removeFromCart = (medicineId) => {
-    setCart(cart.filter(item => item.id !== medicineId));
+
+
+  const removeFromCart = async (medicineId) => {
+    try {
+      await cartService.removeFromCart(medicineId);
+      await fetchCart(); // Refresh cart from backend
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+    }
   };
 
-  const updateCartQuantity = (medicineId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(medicineId);
-    } else {
-      setCart(cart.map(item => 
-        item.id === medicineId 
-          ? { ...item, quantity }
-          : item
-      ));
+  const updateCartQuantity = async (medicineId, quantity) => {
+    try {
+      if (quantity <= 0) {
+        await removeFromCart(medicineId);
+      } else {
+        await cartService.updateCartItem(medicineId, quantity);
+        await fetchCart(); // Refresh cart from backend
+      }
+    } catch (error) {
+      console.error('Error updating cart quantity:', error);
     }
   };
 
@@ -99,10 +131,23 @@ export default function UserDashboard() {
     return cart.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
   };
 
+  const clearCart = async () => {
+    try {
+      await cartService.clearCart();
+      setCart([]);
+      console.log('Cart cleared completely');
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+    }
+  };
+
   return (
     <div className="user-dashboard">
       <aside className="user-sidebar">
-        <div className="user-logo">MEDICO</div>
+        <div className="user-logo">
+          <img src={logoIcon} alt="MEDICO Logo" className="user-logo-image" />
+          <span>MEDICO</span>
+        </div>
         <nav>
           {sections.map(s => (
             <div
@@ -138,28 +183,18 @@ export default function UserDashboard() {
           {active === 'browse' && (
             <div className="user-section">
               <h2>Browse Medicines</h2>
-              <div style={{ marginBottom: 20 }}>
+              <div className="search-filter-container">
                 <input
                   type="text"
                   placeholder="Search medicines..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ 
-                    padding: '8px 12px', 
-                    marginRight: '10px', 
-                    border: '1px solid #ddd', 
-                    borderRadius: '4px',
-                    width: '200px'
-                  }}
+                  className="search-input"
                 />
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  style={{ 
-                    padding: '8px 12px', 
-                    border: '1px solid #ddd', 
-                    borderRadius: '4px'
-                  }}
+                  className="category-select"
                 >
                   {categories.map(cat => (
                     <option key={cat} value={cat}>
@@ -169,75 +204,56 @@ export default function UserDashboard() {
                 </select>
               </div>
               {loading ? (
-                <p style={{ textAlign: 'center', color: '#666' }}>Loading medicines...</p>
+                <div className="loading-state">Loading medicines...</div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
+                <div className="medicine-grid">
                   {filteredMedicines.map(medicine => (
-                    <div key={medicine.id} style={{
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      padding: '16px',
-                      backgroundColor: '#fff'
-                    }}>
+                    <div key={medicine.id} className="medicine-card">
                       {/* Medicine Image */}
-                      <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                      <div>
                         {medicine.image ? (
                           <img 
                             src={`http://localhost:5000${medicine.image}`} 
                             alt={medicine.name}
-                            style={{ 
-                              width: '100%', 
-                              height: '150px', 
-                              objectFit: 'cover',
-                              borderRadius: '4px'
-                            }} 
+                            className="medicine-image"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
                           />
-                        ) : (
-                          <div style={{ 
-                            width: '100%', 
-                            height: '150px', 
-                            backgroundColor: '#f0f0f0',
-                            borderRadius: '4px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#999'
-                          }}>
-                            No Image
-                          </div>
-                        )}
+                        ) : null}
+                        <div 
+                          className="medicine-image-placeholder"
+                          style={{ display: medicine.image ? 'none' : 'flex' }}
+                        >
+                          {medicine.image ? 'Loading...' : 'No Image'}
+                        </div>
                       </div>
                       
-                      <h3 style={{ margin: '0 0 8px 0', color: '#2e7d32' }}>{medicine.name}</h3>
-                      <p style={{ margin: '4px 0', color: '#666' }}>Category: {medicine.category}</p>
-                      <p style={{ margin: '4px 0', fontWeight: 'bold' }}>Price: ${parseFloat(medicine.price).toFixed(2)}</p>
-                      <p style={{ margin: '4px 0', color: medicine.stock < 10 ? '#d32f2f' : '#2e7d32' }}>
-                        Stock: {medicine.stock} {medicine.stock < 10 && '(Low Stock)'}
-                      </p>
-                      <button
-                        onClick={() => addToCart(medicine)}
-                        disabled={medicine.stock === 0}
-                        style={{
-                          backgroundColor: '#2e7d32',
-                          color: 'white',
-                          border: 'none',
-                          padding: '8px 16px',
-                          borderRadius: '4px',
-                          cursor: medicine.stock > 0 ? 'pointer' : 'not-allowed',
-                          opacity: medicine.stock > 0 ? 1 : 0.6,
-                          width: '100%'
-                        }}
-                      >
-                        {medicine.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-                      </button>
+                      <div className="medicine-content">
+                        <h3 className="medicine-name">{medicine.name}</h3>
+                        <p className="medicine-category">Category: {medicine.category}</p>
+                        <p className="medicine-price">Rs {parseFloat(medicine.price).toFixed(2)}</p>
+                        <p className={`medicine-stock ${medicine.stock === 0 ? 'out-of-stock' : medicine.stock < 10 ? 'low-stock' : 'in-stock'}`}>
+                          Stock: {medicine.stock} {medicine.stock < 10 && medicine.stock > 0 && '(Low Stock)'}
+                        </p>
+                        <button
+                          onClick={() => addToCart(medicine)}
+                          disabled={medicine.stock === 0}
+                          className="add-to-cart-btn"
+                        >
+                          {medicine.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
               {!loading && filteredMedicines.length === 0 && (
-                <p style={{ textAlign: 'center', color: '#666', marginTop: '20px' }}>
-                  No medicines found matching your search criteria.
-                </p>
+                <div className="empty-state">
+                  <h3>No medicines found</h3>
+                  <p>No medicines found matching your search criteria.</p>
+                </div>
               )}
             </div>
           )}
@@ -245,45 +261,41 @@ export default function UserDashboard() {
             <div className="user-section">
               <h2>Your Cart</h2>
               {cart.length === 0 ? (
-                <p>Your cart is empty.</p>
+                <div className="empty-state">
+                  <h3>Your cart is empty</h3>
+                  <p>Add some medicines to get started.</p>
+                </div>
               ) : (
                 <div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <table className="cart-table">
                     <thead>
-                      <tr style={{ borderBottom: '1px solid #ddd' }}>
-                        <th style={{ padding: '12px', textAlign: 'left' }}>Medicine</th>
-                        <th style={{ padding: '12px', textAlign: 'left' }}>Price</th>
-                        <th style={{ padding: '12px', textAlign: 'left' }}>Quantity</th>
-                        <th style={{ padding: '12px', textAlign: 'left' }}>Total</th>
-                        <th style={{ padding: '12px', textAlign: 'left' }}>Actions</th>
+                      <tr>
+                        <th>Medicine</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {cart.map(item => (
-                        <tr key={item.id} style={{ borderBottom: '1px solid #eee' }}>
-                          <td style={{ padding: '12px' }}>{item.name}</td>
-                          <td style={{ padding: '12px' }}>${parseFloat(item.price).toFixed(2)}</td>
-                          <td style={{ padding: '12px' }}>
+                        <tr key={item.id}>
+                          <td>{item.name}</td>
+                          <td>Rs. {parseFloat(item.price).toFixed(2)}</td>
+                          <td>
                             <input
                               type="number"
                               min="1"
                               value={item.quantity}
                               onChange={(e) => updateCartQuantity(item.id, parseInt(e.target.value))}
-                              style={{ width: '60px', padding: '4px' }}
+                              className="quantity-input"
                             />
                           </td>
-                          <td style={{ padding: '12px' }}>${(parseFloat(item.price) * item.quantity).toFixed(2)}</td>
-                          <td style={{ padding: '12px' }}>
+                          <td>Rs. {(parseFloat(item.price) * item.quantity).toFixed(2)}</td>
+                          <td>
                             <button
                               onClick={() => removeFromCart(item.id)}
-                              style={{
-                                backgroundColor: '#d32f2f',
-                                color: 'white',
-                                border: 'none',
-                                padding: '4px 8px',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                              }}
+                              className="remove-btn"
                             >
                               Remove
                             </button>
@@ -292,21 +304,19 @@ export default function UserDashboard() {
                       ))}
                     </tbody>
                   </table>
-                  <div style={{ marginTop: '20px', textAlign: 'right' }}>
-                    <h3>Total: ${getTotalPrice().toFixed(2)}</h3>
-                    <button
-                      style={{
-                        backgroundColor: '#2e7d32',
-                        color: 'white',
-                        border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '16px'
-                      }}
-                    >
-                      Checkout
-                    </button>
+                  <div className="cart-total">
+                    <h3>Total: Rs. {getTotalPrice().toFixed(2)}</h3>
+                    <div className="cart-actions">
+                      <button className="checkout-btn">
+                        Checkout
+                      </button>
+                      <button 
+                        onClick={clearCart}
+                        className="clear-cart-btn"
+                      >
+                        Clear Cart
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -316,6 +326,16 @@ export default function UserDashboard() {
           {active === 'profile' && <div className="user-section"><h2>User Profile</h2><p>Profile management.</p></div>}
         </main>
       </div>
+      
+      {/* Popup Notification */}
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-notification">
+            <div className="popup-icon">✓</div>
+            <div className="popup-message">{popupMessage}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

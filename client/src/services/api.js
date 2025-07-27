@@ -3,9 +3,14 @@ const API_BASE = 'http://localhost:5000/api';
 // Common fetch wrapper with error handling
 const apiCall = async (endpoint, options = {}) => {
   const url = `${API_BASE}${endpoint}`;
+  
+  // Get auth token from localStorage
+  const token = localStorage.getItem('token');
+  
   const config = {
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers
     },
     ...options
@@ -29,8 +34,15 @@ const apiCall = async (endpoint, options = {}) => {
 // FormData fetch wrapper for file uploads
 const apiCallFormData = async (endpoint, formData, method = 'POST') => {
   const url = `${API_BASE}${endpoint}`;
+  
+  // Get auth token from localStorage
+  const token = localStorage.getItem('token');
+  
   const config = {
     method: method,
+    headers: {
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
     body: formData
     // Don't set Content-Type for FormData, let browser set it with boundary
   };

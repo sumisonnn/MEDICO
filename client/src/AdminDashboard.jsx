@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import './AdminDashboard.css';
 import Logout from './components/Logout';
 import medicineService from './services/medicineService.js';
+import logoIcon from './assets/MEDICOOO.jpg';
 
 const sections = [
   { key: 'home', label: 'Home' },
@@ -127,7 +128,10 @@ export default function AdminDashboard() {
   return (
     <div className="admin-dashboard">
       <aside className="admin-sidebar">
-        <div className="admin-logo">MEDICO Admin</div>
+        <div className="admin-logo">
+          <img src={logoIcon} alt="MEDICO Logo" className="admin-logo-image" />
+          <span>MEDICO</span>
+        </div>
         <nav>
           {sections.map(s => (
             <div
@@ -173,11 +177,15 @@ export default function AdminDashboard() {
             <div className="admin-section">
               <h2>Manage Medicine</h2>
               <form className="medicine-form" onSubmit={editingId ? handleUpdateMedicine : handleAddMedicine} style={{ marginBottom: 24 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <input name="name" value={form.name} onChange={handleFormChange} placeholder="Name" required />
-                  <input name="category" value={form.category} onChange={handleFormChange} placeholder="Category" required />
-                  <input name="price" value={form.price} onChange={handleFormChange} placeholder="Price" type="number" min="0" step="0.01" required />
-                  <input name="stock" value={form.stock} onChange={handleFormChange} placeholder="Stock" type="number" min="0" required />
+                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '12px 16px', alignItems: 'center', maxWidth: 400 }}>
+                  <label htmlFor="med-name">Name</label>
+                  <input id="med-name" name="name" value={form.name} onChange={handleFormChange} required />
+                  <label htmlFor="med-category">Category</label>
+                  <input id="med-category" name="category" value={form.category} onChange={handleFormChange} required />
+                  <label htmlFor="med-price">Price</label>
+                  <input id="med-price" name="price" value={form.price} onChange={handleFormChange} type="number" min="0" step="0.01" required />
+                  <label htmlFor="med-stock">Stock</label>
+                  <input id="med-stock" name="stock" value={form.stock} onChange={handleFormChange} type="number" min="0" required />
                 </div>
                 
                 {/* Image Upload Section */}
@@ -266,7 +274,7 @@ export default function AdminDashboard() {
                       <td>{med.stock}</td>
                       <td>
                         <button onClick={() => handleEdit(med)}>Edit</button>
-                        <button onClick={() => handleDelete(med.id)} style={{ marginLeft: 8, color: 'red' }}>Delete</button>
+                        <button onClick={() => handleDelete(med.id)} className="delete-btn">Delete</button>
                       </td>
                     </tr>
                   ))}
