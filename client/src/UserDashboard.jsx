@@ -28,6 +28,7 @@ export default function UserDashboard() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
   const [checkoutForm, setCheckoutForm] = useState({
     firstName: '',
     lastName: '',
@@ -75,7 +76,21 @@ export default function UserDashboard() {
   };
 
   useEffect(() => {
-    fetchCart();
+    const initializeDashboard = async () => {
+      setDashboardLoading(true);
+      try {
+        await Promise.all([
+          fetchCart(),
+          fetchOrders()
+        ]);
+      } catch (error) {
+        console.error('Error initializing dashboard:', error);
+      } finally {
+        setDashboardLoading(false);
+      }
+    };
+    
+    initializeDashboard();
   }, []);
 
   // Fetch orders when orders tab is activated
@@ -259,13 +274,74 @@ export default function UserDashboard() {
         <main className="user-main">
           {active === 'dashboard' && (
             <div className="user-section">
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-                <span style={{ fontWeight: 600, color: '#2e7d32', fontSize: 18 }}>
-                  {now.toLocaleDateString()} {now.toLocaleTimeString()}
-                </span>
+              <div className="dashboard-stats">
+                <div className="stats-header">
+                  <h2>Dashboard Overview</h2>
+                  <p>Your pharmacy activity summary</p>
+                </div>
+                
+                <div className="stats-grid">
+                  <div className="stat-card">
+                    <div className="stat-icon">💊</div>
+                    <div className="stat-content">
+                      <h3>Available Medicines</h3>
+                      <div className="stat-number">{medicines ? medicines.length : 0}</div>
+                      <p>Total medicines in stock</p>
+                    </div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-icon">🛒</div>
+                    <div className="stat-content">
+                      <h3>Cart Items</h3>
+                      <div className="stat-number">{cart ? cart.length : 0}</div>
+                      <p>Items in your cart</p>
+                    </div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-icon">📦</div>
+                    <div className="stat-content">
+                      <h3>Total Orders</h3>
+                      <div className="stat-number">{orders ? orders.length : 0}</div>
+                      <p>Orders placed</p>
+                    </div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-icon">💰</div>
+                    <div className="stat-content">
+                      <h3>Cart Total</h3>
+                      <div className="stat-number">Rs. {getTotalPrice ? getTotalPrice().toFixed(2) : '0.00'}</div>
+                      <p>Current cart value</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="quick-actions">
+                  <button 
+                    onClick={() => setActive('browse')} 
+                    className="action-btn primary"
+                    disabled={!medicines || medicines.length === 0}
+                  >
+                    Browse Medicines
+                  </button>
+                  <button 
+                    onClick={() => setActive('cart')} 
+                    className="action-btn secondary"
+                    disabled={!cart || cart.length === 0}
+                  >
+                    View Cart
+                  </button>
+                  <button 
+                    onClick={() => setActive('orders')} 
+                    className="action-btn secondary"
+                    disabled={!orders || orders.length === 0}
+                  >
+                    View Orders
+                  </button>
+                </div>
               </div>
-              <h2>Welcome!</h2>
-              <p>Quick links and stats will appear here.</p>
             </div>
           )}
           {active === 'browse' && (
