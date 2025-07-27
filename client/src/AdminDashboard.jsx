@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import './AdminDashboard.css';
 import Logout from './components/Logout';
 import medicineService from './services/medicineService.js';
+import orderService from './services/orderService.js';
 import logoIcon from './assets/MEDICOOO.jpg';
 
 const sections = [
@@ -18,6 +19,8 @@ export default function AdminDashboard() {
   const [imagePreview, setImagePreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
   // Load medicines from API
   const fetchMedicines = async () => {
@@ -32,6 +35,27 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchMedicines();
   }, []);
+
+  // Load all orders from API
+  const fetchAllOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const data = await orderService.getAllOrders();
+      setOrders(data.orders || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrders([]);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  // Fetch orders when sales history tab is activated
+  useEffect(() => {
+    if (active === 'sales-history') {
+      fetchAllOrders();
+    }
+  }, [active]);
 
   // Live stats
   const totalMedicines = medicines.length;
@@ -285,11 +309,70 @@ export default function AdminDashboard() {
           {active === 'sales-history' && (
             <div className="admin-section">
               <h2>Sales History</h2>
-              <p>View and manage sales records and analytics.</p>
-              <div style={{ marginTop: 20 }}>
-                <h3>Recent Sales</h3>
-                <p>Sales data and reports will be displayed here.</p>
-              </div>
+              {loadingOrders ? (
+                <div className="loading-state">
+                  <p>Loading sales history...</p>
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="empty-state">
+                  <h3>No orders yet</h3>
+                  <p>No sales have been recorded yet.</p>
+                </div>
+              ) : (
+                <div className="sales-container">
+                  <div className="orders-list">
+                    {orders.map(order => (
+                      <div key={order.id} className="order-card-admin">
+                        <div className="order-header-admin">
+                          <div className="order-info-admin">
+                            <h3>Order #{order.orderNumber}</h3>
+                            <p className="order-date-admin">
+                              {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                            <p className="customer-info">
+                              Customer: {order.User ? order.User.email : 'Unknown'}
+                            </p>
+                            <span className={`order-status-admin order-status-${order.status}`}>
+                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </span>
+                          </div>
+                          <div className="order-total-admin">
+                            <strong>Rs. {parseFloat(order.totalAmount).toFixed(2)}</strong>
+                          </div>
+                        </div>
+                        
+                        <div className="order-items-admin">
+                          {order.OrderItems && order.OrderItems.map(item => (
+                            <div key={item.id} className="order-item-admin">
+                              <div className="item-info-admin">
+                                <h4>{item.Medicine ? item.Medicine.name : 'Unknown Medicine'}</h4>
+                                <p>Qty: {item.quantity} × Rs. {parseFloat(item.price).toFixed(2)}</p>
+                              </div>
+                              <div className="item-total-admin">
+                                Rs. {(parseFloat(item.price) * item.quantity).toFixed(2)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <div className="order-delivery-admin">
+                          <h4>Delivery Information</h4>
+                          <p><strong>Address:</strong> {order.deliveryAddress}</p>
+                          <p><strong>Phone:</strong> {order.deliveryPhone}</p>
+                          <p><strong>Email:</strong> {order.deliveryEmail}</p>
+                          <p><strong>Payment:</strong> {order.paymentMethod}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </main>

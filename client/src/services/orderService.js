@@ -29,6 +29,16 @@ export const orderService = {
       console.error('Error fetching order:', error);
       throw error;
     }
+  },
+
+  async getAllOrders() {
+    try {
+      const response = await api.get('/orders/all');
+      return response;
+    } catch (error) {
+      console.error('Error fetching all orders:', error);
+      throw error;
+    }
   }
 };
 

@@ -1,4 +1,4 @@
-import { Order, OrderItem, Cart, CartItem, Medicine } from '../models/index.js';
+import { Order, OrderItem, Cart, CartItem, Medicine, User } from '../models/index.js';
 import { Op } from 'sequelize';
 
 // Generate unique order number
@@ -132,6 +132,31 @@ export const getUserOrders = async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+};
+
+// Get all orders (admin only)
+export const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      include: [
+        {
+          model: OrderItem,
+          include: [Medicine]
+        },
+        {
+          model: User,
+          attributes: ['id', 'email']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({ orders });
+
+  } catch (error) {
+    console.error('Error fetching all orders:', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };

@@ -505,4 +505,199 @@ body {
   .medicine-table td {
     padding: 0.75rem 0.5rem;
   }
+}
+
+/* Sales History Styles */
+.sales-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.order-card-admin {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.order-card-admin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.order-header-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.order-info-admin h3 {
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.order-date-admin {
+  color: #64748b;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.customer-info {
+  color: #475569;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.order-status-admin {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.order-status-admin-confirmed {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.order-status-admin-shipped {
+  background: #e0e7ff;
+  color: #7c3aed;
+}
+
+.order-status-admin-delivered {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.order-status-admin-cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.order-total-admin {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.order-items-admin {
+  margin-bottom: 1.5rem;
+}
+
+.order-item-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-item-admin:last-child {
+  border-bottom: none;
+}
+
+.item-info-admin h4 {
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.item-info-admin p {
+  color: #64748b;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.item-total-admin {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.order-delivery-admin {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.order-delivery-admin h4 {
+  color: #1e293b;
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.order-delivery-admin p {
+  color: #475569;
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
+}
+
+.empty-state h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: #1e293b;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Responsive Design for Sales History */
+@media (max-width: 768px) {
+  .order-header-admin {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .order-total-admin {
+    font-size: 1.1rem;
+  }
+  
+  .order-item-admin {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .item-total-admin {
+    align-self: flex-end;
+  }
 } 
