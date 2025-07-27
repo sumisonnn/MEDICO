@@ -52,6 +52,13 @@ export default function UserDashboard() {
     phone: ''
   });
 
+  // Carousel state
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const showSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
@@ -101,7 +108,7 @@ export default function UserDashboard() {
         console.error('Error initializing dashboard:', error);
       } finally {
         setDashboardLoading(false);
-      }
+    }
     };
     
     initializeDashboard();
@@ -186,9 +193,9 @@ export default function UserDashboard() {
 
   const updateCartQuantity = async (medicineId, quantity) => {
     try {
-      if (quantity <= 0) {
+    if (quantity <= 0) {
         await removeFromCart(medicineId);
-      } else {
+    } else {
         await cartService.updateCartItem(medicineId, quantity);
         await fetchCart(); // Refresh cart from backend
       }
@@ -355,72 +362,72 @@ export default function UserDashboard() {
         <main className="user-main">
           {active === 'dashboard' && (
             <div className="user-section">
-              <div className="dashboard-stats">
-                <div className="stats-header">
-                  <h2>Dashboard Overview</h2>
-                  <p>Your pharmacy activity summary</p>
+              <div className="home-container">
+                <div className="image-carousel">
+                  <div className="carousel-container">
+                    <img 
+                      src="/src/assets/why.png" 
+                      alt="Banner 1" 
+                      className={`carousel-image ${currentSlide === 0 ? 'active' : ''}`} 
+                    />
+                    <img 
+                      src="/src/assets/ok2.jpg" 
+                      alt="Banner 2" 
+                      className={`carousel-image ${currentSlide === 1 ? 'active' : ''}`} 
+                    />
+                    <img 
+                      src="/src/assets/why.png" 
+                      alt="Banner 3" 
+                      className={`carousel-image ${currentSlide === 2 ? 'active' : ''}`} 
+                    />
+                    
+                    <button 
+                      className="carousel-btn carousel-btn-left" 
+                      onClick={() => showSlide((currentSlide - 1 + 3) % 3)}
+                      title="Previous"
+                    >
+                      ‹
+                    </button>
+                    <button 
+                      className="carousel-btn carousel-btn-right" 
+                      onClick={() => showSlide((currentSlide + 1) % 3)}
+                      title="Next"
+                    >
+                      ›
+                    </button>
+                  </div>
+                  <div className="carousel-dots">
+                    <span 
+                      className={`dot ${currentSlide === 0 ? 'active' : ''}`} 
+                      onClick={() => showSlide(0)}
+                      title="Slide 1"
+                    ></span>
+                    <span 
+                      className={`dot ${currentSlide === 1 ? 'active' : ''}`} 
+                      onClick={() => showSlide(1)}
+                      title="Slide 2"
+                    ></span>
+                    <span 
+                      className={`dot ${currentSlide === 2 ? 'active' : ''}`} 
+                      onClick={() => showSlide(2)}
+                      title="Slide 3"
+                    ></span>
+                  </div>
                 </div>
                 
-                <div className="stats-grid">
-                  <div className="stat-card">
-                    <div className="stat-icon">💊</div>
-                    <div className="stat-content">
-                      <h3>Available Medicines</h3>
-                      <div className="stat-number">{medicines ? medicines.length : 0}</div>
-                      <p>Total medicines in stock</p>
-                    </div>
+                <div className="quick-stats">
+                  <div className="stat-item">
+                    <span className="stat-number">{medicines ? medicines.length : 0}</span>
+                    <span className="stat-label">Available Medicines</span>
                   </div>
-                  
-                  <div className="stat-card">
-                    <div className="stat-icon">🛒</div>
-                    <div className="stat-content">
-                      <h3>Cart Items</h3>
-                      <div className="stat-number">{cart ? cart.length : 0}</div>
-                      <p>Items in your cart</p>
-                    </div>
+                  <div className="stat-item">
+                    <span className="stat-number">{cart ? cart.length : 0}</span>
+                    <span className="stat-label">Cart Items</span>
                   </div>
-                  
-                  <div className="stat-card">
-                    <div className="stat-icon">📦</div>
-                    <div className="stat-content">
-                      <h3>Total Orders</h3>
-                      <div className="stat-number">{orders ? orders.length : 0}</div>
-                      <p>Orders placed</p>
-                    </div>
+                  <div className="stat-item">
+                    <span className="stat-number">{orders ? orders.length : 0}</span>
+                    <span className="stat-label">Total Orders</span>
                   </div>
-                  
-                  <div className="stat-card">
-                    <div className="stat-icon">💰</div>
-                    <div className="stat-content">
-                      <h3>Cart Total</h3>
-                      <div className="stat-number">Rs. {getTotalPrice ? getTotalPrice().toFixed(2) : '0.00'}</div>
-                      <p>Current cart value</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="quick-actions">
-                  <button 
-                    onClick={() => setActive('browse')} 
-                    className="action-btn primary"
-                    disabled={!medicines || medicines.length === 0}
-                  >
-                    Browse Medicines
-                  </button>
-                  <button 
-                    onClick={() => setActive('cart')} 
-                    className="action-btn secondary"
-                    disabled={!cart || cart.length === 0}
-                  >
-                    View Cart
-                  </button>
-                  <button 
-                    onClick={() => setActive('orders')} 
-                    className="action-btn secondary"
-                    disabled={!orders || orders.length === 0}
-                  >
-                    View Orders
-                  </button>
                 </div>
               </div>
             </div>
@@ -464,7 +471,7 @@ export default function UserDashboard() {
                             onError={(e) => {
                               e.target.style.display = 'none';
                               e.target.nextSibling.style.display = 'flex';
-                            }}
+                            }} 
                           />
                         ) : null}
                         <div 
@@ -472,7 +479,7 @@ export default function UserDashboard() {
                           style={{ display: medicine.image ? 'none' : 'flex' }}
                         >
                           {medicine.image ? 'Loading...' : 'No Image'}
-                        </div>
+                          </div>
                       </div>
                       
                       <div className="medicine-content">
@@ -481,14 +488,14 @@ export default function UserDashboard() {
                         <p className="medicine-price">Rs {parseFloat(medicine.price).toFixed(2)}</p>
                         <p className={`medicine-stock ${medicine.stock === 0 ? 'out-of-stock' : medicine.stock < 10 ? 'low-stock' : 'in-stock'}`}>
                           Stock: {medicine.stock} {medicine.stock < 10 && medicine.stock > 0 && '(Low Stock)'}
-                        </p>
-                        <button
-                          onClick={() => addToCart(medicine)}
-                          disabled={medicine.stock === 0}
+                      </p>
+                      <button
+                        onClick={() => addToCart(medicine)}
+                        disabled={medicine.stock === 0}
                           className="add-to-cart-btn"
-                        >
-                          {medicine.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-                        </button>
+                      >
+                        {medicine.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                      </button>
                       </div>
                     </div>
                   ))}
@@ -552,7 +559,7 @@ export default function UserDashboard() {
                                       <div className="cart-total">
                       <h3>Total: Rs. {getTotalPrice().toFixed(2)}</h3>
                       <div className="cart-actions">
-                        <button 
+                    <button
                           onClick={() => {
                             if (cart.length === 0) {
                               setPopupMessage('Your cart is empty!');
@@ -565,9 +572,9 @@ export default function UserDashboard() {
                           }}
                           className="checkout-btn"
                           disabled={cart.length === 0}
-                        >
-                          Checkout
-                        </button>
+                    >
+                      Checkout
+                    </button>
                         <button 
                           onClick={() => {
                             cartService.clearCart().then(() => {
