@@ -21,6 +21,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Carousel functions
+  const showSlide = (index) => {
+    setCurrentSlide(index);
+  };
 
   // Load medicines from API
   const fetchMedicines = async () => {
@@ -179,22 +185,74 @@ export default function AdminDashboard() {
         <main className="admin-main">
           {active === 'home' && (
             <div className="admin-section">
-              <div className="admin-stats-row">
-                <div className="admin-stat-card">
-                  <div className="admin-stat-label">Total Medicines</div>
-                  <div className="admin-stat-value">{totalMedicines}</div>
+              <div className="home-container">
+                <div className="image-carousel">
+                  <div className="carousel-container">
+                    <img 
+                      src="/src/assets/why.png" 
+                      alt="Banner 1" 
+                      className={`carousel-image ${currentSlide === 0 ? 'active' : ''}`} 
+                    />
+                    <img 
+                      src="/src/assets/ok2.jpg" 
+                      alt="Banner 2" 
+                      className={`carousel-image ${currentSlide === 1 ? 'active' : ''}`} 
+                    />
+                    <img 
+                      src="/src/assets/why.png" 
+                      alt="Banner 3" 
+                      className={`carousel-image ${currentSlide === 2 ? 'active' : ''}`} 
+                    />
+                    
+                    <button 
+                      className="carousel-btn carousel-btn-left" 
+                      onClick={() => showSlide((currentSlide - 1 + 3) % 3)}
+                      title="Previous"
+                    >
+                      ‹
+                    </button>
+                    <button 
+                      className="carousel-btn carousel-btn-right" 
+                      onClick={() => showSlide((currentSlide + 1) % 3)}
+                      title="Next"
+                    >
+                      ›
+                    </button>
+                  </div>
+                  <div className="carousel-dots">
+                    <span 
+                      className={`dot ${currentSlide === 0 ? 'active' : ''}`} 
+                      onClick={() => showSlide(0)}
+                      title="Slide 1"
+                    ></span>
+                    <span 
+                      className={`dot ${currentSlide === 1 ? 'active' : ''}`} 
+                      onClick={() => showSlide(1)}
+                      title="Slide 2"
+                    ></span>
+                    <span 
+                      className={`dot ${currentSlide === 2 ? 'active' : ''}`} 
+                      onClick={() => showSlide(2)}
+                      title="Slide 3"
+                    ></span>
+                  </div>
                 </div>
-                <div className="admin-stat-card">
-                  <div className="admin-stat-label">Total Stock</div>
-                  <div className="admin-stat-value">{totalStock}</div>
-                </div>
-                <div className="admin-stat-card">
-                  <div className="admin-stat-label">Low Stock (&lt; 10)</div>
-                  <div className="admin-stat-value" style={{ color: lowStockCount > 0 ? '#d32f2f' : '#2e7d32' }}>{lowStockCount}</div>
+                
+                <div className="quick-stats">
+                  <div className="stat-item">
+                    <span className="stat-number">{totalMedicines}</span>
+                    <span className="stat-label">Total Medicines</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-number">{totalStock}</span>
+                    <span className="stat-label">Total Stock</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-number">{orders.length}</span>
+                    <span className="stat-label">Total Orders</span>
+                  </div>
                 </div>
               </div>
-              <h2>Welcome, Admin!</h2>
-              <p>Overview and stats will appear here.</p>
             </div>
           )}
           {active === 'manage-medicine' && (
