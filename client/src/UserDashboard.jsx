@@ -31,8 +31,7 @@ export default function UserDashboard() {
     email: '',
     phone: '',
     address: '',
-    city: '',
-    postalCode: ''
+    city: ''
   });
 
   // Profile state
@@ -254,14 +253,14 @@ export default function UserDashboard() {
     try {
       // Validate form
       if (!checkoutForm.firstName || !checkoutForm.lastName || !checkoutForm.email || 
-          !checkoutForm.phone || !checkoutForm.address || !checkoutForm.city || !checkoutForm.postalCode) {
+          !checkoutForm.phone || !checkoutForm.address || !checkoutForm.city) {
         alert('Please fill in all delivery information');
         return;
       }
 
       // Create order data
       const orderData = {
-        deliveryAddress: `${checkoutForm.firstName} ${checkoutForm.lastName}\n${checkoutForm.address}\n${checkoutForm.city}, ${checkoutForm.postalCode}`,
+        deliveryAddress: `${checkoutForm.firstName} ${checkoutForm.lastName}\n${checkoutForm.address}\n${checkoutForm.city}`,
         deliveryPhone: checkoutForm.phone,
         deliveryEmail: checkoutForm.email
       };
@@ -284,8 +283,7 @@ export default function UserDashboard() {
         email: '',
         phone: '',
         address: '',
-        city: '',
-        postalCode: ''
+        city: ''
       });
       
       // Show success message
@@ -569,28 +567,20 @@ export default function UserDashboard() {
                         onChange={handleCheckoutFormChange}
                         required 
                       />
-                      <textarea 
+                      <input 
+                        type="text" 
                         name="address"
                         placeholder="Delivery Address" 
-                        rows="3" 
                         value={checkoutForm.address}
                         onChange={handleCheckoutFormChange}
                         required
-                      ></textarea>
+                      />
                       <div className="form-row-simple">
                         <input 
                           type="text" 
                           name="city"
                           placeholder="City" 
                           value={checkoutForm.city}
-                          onChange={handleCheckoutFormChange}
-                          required 
-                        />
-                        <input 
-                          type="text" 
-                          name="postalCode"
-                          placeholder="Postal Code" 
-                          value={checkoutForm.postalCode}
                           onChange={handleCheckoutFormChange}
                           required 
                         />

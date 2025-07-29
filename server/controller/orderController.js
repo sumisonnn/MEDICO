@@ -208,16 +208,3 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to update order status' });
   }
 }; 
-
-export const deleteOrder = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    // Delete all OrderItems for this order
-    await OrderItem.destroy({ where: { orderId } });
-    // Delete the order itself
-    await Order.destroy({ where: { id: orderId } });
-    res.json({ message: 'Order and its items deleted.' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to delete order.' });
-  }
-}; 
