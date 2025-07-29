@@ -24,6 +24,9 @@ export default function AdminDashboard() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteOrderId, setDeleteOrderId] = useState(null);
 
   // Carousel functions
   const showSlide = (index) => {
@@ -138,13 +141,32 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this medicine?')) return;
-    
+    setDeleteConfirmId(id);
+  };
+  const confirmDelete = async () => {
     try {
-      await medicineService.deleteMedicine(id);
+      await medicineService.deleteMedicine(deleteConfirmId);
       await fetchMedicines(); // Refresh the list
+      setShowDeletePopup(true);
+      setTimeout(() => setShowDeletePopup(false), 1500);
     } catch (error) {
       alert(error.message || 'Failed to delete medicine');
+    } finally {
+      setDeleteConfirmId(null);
+    }
+  };
+
+  const handleDeleteOrder = (orderId) => {
+    setDeleteOrderId(orderId);
+  };
+  const confirmDeleteOrder = async () => {
+    try {
+      await fetch(`/api/order/${deleteOrderId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      await fetchAllOrders();
+    } catch (error) {
+      alert('Failed to delete order');
+    } finally {
+      setDeleteOrderId(null);
     }
   };
 
@@ -281,6 +303,9 @@ export default function AdminDashboard() {
                           </div>
                           <div className="order-total-admin">
                             <strong>Rs. {parseFloat(order.totalAmount).toFixed(2)}</strong>
+                            <button className="action-btn delete" style={{ marginLeft: 12 }} onClick={() => handleDeleteOrder(order.id)}>
+                              Delete
+                            </button>
                           </div>
                         </div>
                         
@@ -355,6 +380,44 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {showDeletePopup && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ minWidth: 260, textAlign: 'center', padding: '32px 24px' }}>
+            <div className="modal-header" style={{ justifyContent: 'center', marginBottom: 0 }}>
+              <span style={{ color: '#e53e3e', fontWeight: 700, fontSize: '1.2rem' }}>Medicine deleted!</span>
+              <button className="modal-close-btn" onClick={() => setShowDeletePopup(false)} title="Close">&times;</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteConfirmId && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="delete-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="delete-modal-header">
+              Are you sure you want to delete this medicine?
+              <button className="modal-close-btn" onClick={() => setDeleteConfirmId(null)} title="Close">&times;</button>
+            </div>
+            <div className="delete-modal-actions">
+              <button className="delete-modal-btn cancel" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+              <button className="delete-modal-btn delete" onClick={confirmDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteOrderId && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="delete-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="delete-modal-header">
+              Are you sure you want to delete this order?
+              <button className="modal-close-btn" onClick={() => setDeleteOrderId(null)} title="Close">&times;</button>
+            </div>
+            <div className="delete-modal-actions">
+              <button className="delete-modal-btn cancel" onClick={() => setDeleteOrderId(null)}>Cancel</button>
+              <button className="delete-modal-btn delete" onClick={confirmDeleteOrder}>Delete</button>
+            </div>
           </div>
         </div>
       )}
