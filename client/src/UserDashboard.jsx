@@ -334,61 +334,17 @@ export default function UserDashboard() {
           {active === 'dashboard' && (
             <div className="user-section">
               <div className="home-container">
-                <div className="image-carousel">
-                  <div className="carousel-container">
-                    <img 
-                      src="/src/assets/why.png" 
-                      alt="Banner 1" 
-                      className={`carousel-image ${currentSlide === 0 ? 'active' : ''}`} 
-                    />
-                    <img 
-                      src="/src/assets/ok2.jpg" 
-                      alt="Banner 2" 
-                      className={`carousel-image ${currentSlide === 1 ? 'active' : ''}`} 
-                    />
-                    <img 
-                      src="/src/assets/why.png" 
-                      alt="Banner 3" 
-                      className={`carousel-image ${currentSlide === 2 ? 'active' : ''}`} 
-                    />
-                    
-                    <button 
-                      className="carousel-btn carousel-btn-left" 
-                      onClick={() => showSlide((currentSlide - 1 + 3) % 3)}
-                      title="Previous"
-                    >
-                      ‹
-                    </button>
-                    <button 
-                      className="carousel-btn carousel-btn-right" 
-                      onClick={() => showSlide((currentSlide + 1) % 3)}
-                      title="Next"
-                    >
-                      ›
-                    </button>
-                  </div>
-                  <div className="carousel-dots">
-                    <span 
-                      className={`dot ${currentSlide === 0 ? 'active' : ''}`} 
-                      onClick={() => showSlide(0)}
-                      title="Slide 1"
-                    ></span>
-                    <span 
-                      className={`dot ${currentSlide === 1 ? 'active' : ''}`} 
-                      onClick={() => showSlide(1)}
-                      title="Slide 2"
-                    ></span>
-                    <span 
-                      className={`dot ${currentSlide === 2 ? 'active' : ''}`} 
-                      onClick={() => showSlide(2)}
-                      title="Slide 3"
-                    ></span>
-                  </div>
+                {/* New Banner Image */}
+                <div className="dashboard-banner">
+                  <img 
+                    src="/src/assets/medicine.png" 
+                    alt="Healthcare Banner" 
+                    className="dashboard-banner-image"
+                  />
                 </div>
                 
                 {/* Browse Medicines Section */}
                 <div className="browse-medicines-home">
-                  <h2>MEDICINES</h2>
                   <div className="search-filter-container">
                     <input
                       type="text"
@@ -549,27 +505,10 @@ export default function UserDashboard() {
             <div className="user-section">
               <h2>Checkout</h2>
               
-              {!showCheckout ? (
-                <div className="empty-state">
-                  <h3>Access Checkout</h3>
-                  <p>Please go to your cart and click the "Checkout" button to proceed with your order.</p>
-                  <button 
-                    onClick={() => setActive('cart')}
-                    className="browse-btn"
-                  >
-                    Go to Cart
-                  </button>
-                </div>
-              ) : cart.length === 0 ? (
+              {cart.length === 0 ? (
                 <div className="empty-state">
                   <h3>Your cart is empty</h3>
                   <p>Add some medicines to your cart before checkout.</p>
-                  <button 
-                    onClick={() => setActive('browse')}
-                    className="browse-btn"
-                  >
-                    Browse Medicines
-                  </button>
                 </div>
               ) : (
                 <div className="simple-checkout">
@@ -759,12 +698,10 @@ export default function UserDashboard() {
           )}
           {active === 'profile' && (
             <div className="user-section">
-              <div className="profile-container">
+              <div className="profile-container simple-profile">
                 <div className="profile-header">
                   <h2>User Profile</h2>
-                  <p>Manage your account information</p>
                 </div>
-                
                 <div className="profile-form">
                   <div className="form-group">
                     <label htmlFor="username">Username</label>
@@ -779,10 +716,9 @@ export default function UserDashboard() {
                         placeholder="Enter username"
                       />
                     ) : (
-                      <div className="profile-value">{profile.username || 'Not set'}</div>
+                      <div className="profile-value">{profile.username || ''}</div>
                     )}
                   </div>
-                  
                   <div className="form-group">
                     <label htmlFor="email">Email</label>
                     {isEditingProfile ? (
@@ -796,10 +732,9 @@ export default function UserDashboard() {
                         placeholder="Enter email"
                       />
                     ) : (
-                      <div className="profile-value">{profile.email || 'Not set'}</div>
+                      <div className="profile-value">{profile.email || ''}</div>
                     )}
                   </div>
-                  
                   <div className="form-group">
                     <label htmlFor="phone">Phone Number</label>
                     {isEditingProfile ? (
@@ -813,10 +748,9 @@ export default function UserDashboard() {
                         placeholder="Enter phone number"
                       />
                     ) : (
-                      <div className="profile-value">{profile.phone || 'Not set'}</div>
+                      <div className="profile-value">{profile.phone || ''}</div>
                     )}
                   </div>
-                  
                   <div className="profile-actions">
                     {isEditingProfile ? (
                       <>
@@ -824,7 +758,7 @@ export default function UserDashboard() {
                           onClick={handleSaveProfile}
                           className="profile-btn primary"
                         >
-                          Save Changes
+                          Save
                         </button>
                         <button 
                           onClick={handleCancelEdit}

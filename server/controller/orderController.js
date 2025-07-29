@@ -186,3 +186,25 @@ export const getOrderById = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch order' });
   }
 }; 
+
+// Admin: Update order status (confirm/process)
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    const allowedStatuses = ['confirmed', 'shipped', 'delivered', 'cancelled'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+    const order = await Order.findByPk(orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    order.status = status;
+    await order.save();
+    res.json({ message: `Order status updated to ${status}`, order });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ error: 'Failed to update order status' });
+  }
+}; 

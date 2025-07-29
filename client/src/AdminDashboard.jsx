@@ -9,13 +9,12 @@ import ok2Image from './assets/ok2.jpg';
 import bannerImage from './assets/banner.jpg';
 
 const sections = [
-  { key: 'home', label: 'Home' },
   { key: 'manage-medicine', label: 'Manage Medicine' },
   { key: 'sales-history', label: 'Sales History' },
 ];
 
 export default function AdminDashboard() {
-  const [active, setActive] = useState('home');
+  const [active, setActive] = useState('manage-medicine');
   const [medicines, setMedicines] = useState([]);
   const [form, setForm] = useState({ name: '', category: '', price: '', stock: '' });
   const [selectedImage, setSelectedImage] = useState(null);
@@ -24,6 +23,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   // Carousel functions
   const showSlide = (index) => {
@@ -176,118 +176,9 @@ export default function AdminDashboard() {
           </div>
         </header>
         <main className="admin-main">
-          {active === 'home' && (
-            <div className="admin-section">
-              <div className="home-container">
-                <div className="image-carousel">
-                  <div className="carousel-container">
-                    <img 
-                      src={whyImage} 
-                      alt="Banner 1" 
-                      className={`carousel-image ${currentSlide === 0 ? 'active' : ''}`} 
-                    />
-                    <img 
-                      src={ok2Image} 
-                      alt="Banner 2" 
-                      className={`carousel-image ${currentSlide === 1 ? 'active' : ''}`} 
-                    />
-                    <img 
-                      src={bannerImage} 
-                      alt="Banner 3" 
-                      className={`carousel-image ${currentSlide === 2 ? 'active' : ''}`} 
-                    />
-                    
-                    <button 
-                      className="carousel-btn carousel-btn-left" 
-                      onClick={() => showSlide((currentSlide - 1 + 3) % 3)}
-                      title="Previous"
-                    >
-                      ‹
-                    </button>
-                    <button 
-                      className="carousel-btn carousel-btn-right" 
-                      onClick={() => showSlide((currentSlide + 1) % 3)}
-                      title="Next"
-                    >
-                      ›
-                    </button>
-                  </div>
-                  <div className="carousel-dots">
-                    <span 
-                      className={`dot ${currentSlide === 0 ? 'active' : ''}`} 
-                      onClick={() => showSlide(0)}
-                      title="Slide 1"
-                    ></span>
-                    <span 
-                      className={`dot ${currentSlide === 1 ? 'active' : ''}`} 
-                      onClick={() => showSlide(1)}
-                      title="Slide 2"
-                    ></span>
-                    <span 
-                      className={`dot ${currentSlide === 2 ? 'active' : ''}`} 
-                      onClick={() => showSlide(2)}
-                      title="Slide 3"
-                    ></span>
-                  </div>
-                </div>
-                
-                <div className="quick-stats">
-                  <div className="stat-item">
-                    <span className="stat-number">{totalMedicines}</span>
-                    <span className="stat-label">Total Medicines</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-number">{totalStock}</span>
-                    <span className="stat-label">Total Stock</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-number">{orders.length}</span>
-                    <span className="stat-label">Total Orders</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
           {active === 'manage-medicine' && (
             <div className="admin-section">
               <h2>Manage Medicine</h2>
-              <form className="medicine-form" onSubmit={editingId ? handleUpdateMedicine : handleAddMedicine} style={{ marginBottom: 24 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '12px 16px', alignItems: 'center', maxWidth: 400 }}>
-                  <label htmlFor="med-name">Name</label>
-                  <input id="med-name" name="name" value={form.name} onChange={handleFormChange} required />
-                  <label htmlFor="med-category">Category</label>
-                  <input id="med-category" name="category" value={form.category} onChange={handleFormChange} required />
-                  <label htmlFor="med-price">Price</label>
-                  <input id="med-price" name="price" value={form.price} onChange={handleFormChange} type="number" min="0" step="0.01" required />
-                  <label htmlFor="med-stock">Stock</label>
-                  <input id="med-stock" name="stock" value={form.stock} onChange={handleFormChange} type="number" min="0" required />
-                </div>
-                
-                {/* Image Upload Section */}
-                <div style={{ marginTop: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    Medicine Image
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    style={{ marginBottom: '8px' }}
-                  />
-                </div>
-                
-                <div style={{ marginTop: '16px' }}>
-                  <button type="submit" disabled={loading}>
-                    {loading ? 'Processing...' : (editingId ? 'Update' : 'Add')}
-                  </button>
-                  {editingId && (
-                    <button type="button" onClick={clearForm} style={{ marginLeft: '8px' }}>
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </form>
-              
               <table className="medicine-table">
                 <thead>
                   <tr>
@@ -334,13 +225,22 @@ export default function AdminDashboard() {
                       <td>${parseFloat(med.price).toFixed(2)}</td>
                       <td>{med.stock}</td>
                       <td>
-                        <button onClick={() => handleEdit(med)}>Edit</button>
-                        <button onClick={() => handleDelete(med.id)} className="delete-btn">Delete</button>
+                        <button className="action-btn edit" onClick={() => handleEdit(med)} style={{ marginRight: 4 }}>
+                          Edit
+                        </button>
+                        <button className="action-btn delete" onClick={() => handleDelete(med.id)}>
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              <div style={{ marginTop: '20px', textAlign: 'right' }}>
+                <button onClick={() => { clearForm(); setShowAddForm(true); }} style={{ padding: '8px 20px', fontSize: '1rem' }}>
+                  Add Medicine
+                </button>
+              </div>
             </div>
           )}
           {active === 'sales-history' && (
@@ -417,6 +317,47 @@ export default function AdminDashboard() {
           &copy; {new Date().getFullYear()} MEDICO Admin. All rights reserved.
         </footer>
       </div>
+      {(showAddForm || editingId) && (
+        <div className="modal-overlay" onClick={() => { clearForm(); setShowAddForm(false); }}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              {editingId ? 'Edit Medicine' : 'Add Medicine'}
+              <button className="modal-close-btn" onClick={() => { clearForm(); setShowAddForm(false); }} title="Close">&times;</button>
+            </div>
+            <form className="medicine-form" onSubmit={editingId ? handleUpdateMedicine : handleAddMedicine}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '12px 16px', alignItems: 'center', maxWidth: 400 }}>
+                <label htmlFor="med-name">Name</label>
+                <input id="med-name" name="name" value={form.name} onChange={handleFormChange} required />
+                <label htmlFor="med-category">Category</label>
+                <input id="med-category" name="category" value={form.category} onChange={handleFormChange} required />
+                <label htmlFor="med-price">Price</label>
+                <input id="med-price" name="price" value={form.price} onChange={handleFormChange} type="number" min="0" step="0.01" required />
+                <label htmlFor="med-stock">Stock</label>
+                <input id="med-stock" name="stock" value={form.stock} onChange={handleFormChange} type="number" min="0" required />
+              </div>
+              <div style={{ marginTop: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                  Medicine Image
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  style={{ marginBottom: '8px' }}
+                />
+              </div>
+              <div style={{ marginTop: '16px' }}>
+                <button type="submit" disabled={loading}>
+                  {loading ? 'Processing...' : (editingId ? 'Update' : 'Add')}
+                </button>
+                <button type="button" onClick={() => { clearForm(); setShowAddForm(false); }} style={{ marginLeft: '8px' }}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
