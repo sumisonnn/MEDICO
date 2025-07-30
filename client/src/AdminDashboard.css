@@ -146,7 +146,7 @@ body {
   color: #4a5568;
   background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
   padding: 0.75rem 1.5rem;
-  border-radius: 12px;
+  border-radius: 0;
   font-weight: 600;
   border: 1px solid #e2e8f0;
   display: flex;
@@ -166,7 +166,7 @@ body {
 
 .admin-section {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 2rem;
   min-height: 400px;
@@ -185,7 +185,7 @@ body {
   position: relative;
   width: 1240px;
   height: 430px;
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   margin: 0 auto;
@@ -213,7 +213,7 @@ body {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   background: linear-gradient(135deg, #f7fafc 0%, #e2e8f0 100%);
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .carousel-image.active {
@@ -425,7 +425,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e8f0;
@@ -985,7 +985,7 @@ body {
 
 .modal-content {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 0;
   padding: 32px 28px 24px 28px;
   box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18), 0 1.5px 8px rgba(44,62,80,0.08);
   min-width: 340px;
@@ -1190,7 +1190,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e8f0;
