@@ -3,6 +3,7 @@ import './AdminDashboard.css';
 import Logout from './components/Logout';
 import medicineService from './services/medicineService.js';
 import orderService from './services/orderService.js';
+import userService from './services/userService.js';
 import logoIcon from './assets/MEDICOOO.jpg';
 import whyImage from './assets/why.png';
 import ok2Image from './assets/ok2.jpg';
@@ -11,6 +12,7 @@ import bannerImage from './assets/banner.jpg';
 const sections = [
   { key: 'manage-medicine', label: 'Manage Medicine' },
   { key: 'sales-history', label: 'Sales History' },
+  { key: 'manage-users', label: 'Manage Users' },
 ];
 
 export default function AdminDashboard() {
@@ -26,6 +28,17 @@ export default function AdminDashboard() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [showStatusUpdatePopup, setShowStatusUpdatePopup] = useState(false);
+  const [statusUpdateMessage, setStatusUpdateMessage] = useState('');
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editUserForm, setEditUserForm] = useState({
+    username: '',
+    email: '',
+    role: 'user'
+  });
 
   // Carousel functions
   const showSlide = (index) => {
@@ -60,10 +73,31 @@ export default function AdminDashboard() {
     }
   };
 
+  // Load all users from API
+  const fetchAllUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const data = await userService.getAllUsers();
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setUsers([]);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
   // Fetch orders when sales history tab is activated
   useEffect(() => {
     if (active === 'sales-history') {
       fetchAllOrders();
+    }
+  }, [active]);
+
+  // Fetch users when manage users tab is activated
+  useEffect(() => {
+    if (active === 'manage-users') {
+      fetchAllUsers();
     }
   }, [active]);
 
@@ -152,6 +186,72 @@ export default function AdminDashboard() {
       alert(error.message || 'Failed to delete medicine');
     } finally {
       setDeleteConfirmId(null);
+    }
+  };
+
+  // User management functions
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setEditUserForm({
+      username: user.username || '',
+      email: user.email || '',
+      role: user.role || 'user'
+    });
+    setShowEditUserModal(true);
+  };
+
+  const handleEditUserFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditUserForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSaveUser = async () => {
+    try {
+      await userService.updateUser(editingUser.id, editUserForm);
+      await fetchAllUsers(); // Refresh the list
+      setShowEditUserModal(false);
+      setEditingUser(null);
+      setEditUserForm({ username: '', email: '', role: 'user' });
+      alert('User updated successfully!');
+    } catch (error) {
+      alert(error.response?.data?.error || 'Failed to update user');
+    }
+  };
+
+  const handleCancelEditUser = () => {
+    setShowEditUserModal(false);
+    setEditingUser(null);
+    setEditUserForm({ username: '', email: '', role: 'user' });
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await userService.deleteUser(userId);
+        await fetchAllUsers(); // Refresh the list
+        alert('User deleted successfully!');
+      } catch (error) {
+        alert(error.response?.data?.error || 'Failed to delete user');
+      }
+    }
+  };
+
+  // Order status management
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      await orderService.updateOrderStatus(orderId, newStatus);
+      await fetchAllOrders(); // Refresh orders
+      setStatusUpdateMessage(`Order status updated to ${newStatus}!`);
+      setShowStatusUpdatePopup(true);
+      setTimeout(() => setShowStatusUpdatePopup(false), 2000);
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      setStatusUpdateMessage('Failed to update order status');
+      setShowStatusUpdatePopup(true);
+      setTimeout(() => setShowStatusUpdatePopup(false), 2000);
     }
   };
 
@@ -312,9 +412,124 @@ export default function AdminDashboard() {
                           <p><strong>Email:</strong> {order.deliveryEmail}</p>
                           <p><strong>Payment:</strong> {order.paymentMethod}</p>
                         </div>
+                        
+                        <div className="order-actions-admin">
+                          <h4>Order Actions</h4>
+                          <div className="status-buttons">
+                            {order.status === 'pending' && (
+                              <>
+                                <button 
+                                  className="status-btn confirm"
+                                  onClick={() => updateOrderStatus(order.id, 'confirmed')}
+                                >
+                                  Confirm Order
+                                </button>
+                                <button 
+                                  className="status-btn process"
+                                  onClick={() => updateOrderStatus(order.id, 'processing')}
+                                >
+                                  Process Order
+                                </button>
+                              </>
+                            )}
+                            {order.status === 'confirmed' && (
+                              <button 
+                                className="status-btn process"
+                                onClick={() => updateOrderStatus(order.id, 'processing')}
+                              >
+                                Process Order
+                              </button>
+                            )}
+                            {order.status === 'processing' && (
+                              <button 
+                                className="status-btn ship"
+                                onClick={() => updateOrderStatus(order.id, 'shipped')}
+                              >
+                                Mark as Shipped
+                              </button>
+                            )}
+                            {order.status === 'shipped' && (
+                              <button 
+                                className="status-btn deliver"
+                                onClick={() => updateOrderStatus(order.id, 'delivered')}
+                              >
+                                Mark as Delivered
+                              </button>
+                            )}
+                            {order.status === 'delivered' && (
+                              <span className="status-complete">Order Completed</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+          {active === 'manage-users' && (
+            <div className="admin-section">
+              <h2>Manage Users</h2>
+              {loadingUsers ? (
+                <div className="loading-state">
+                  <p>Loading users...</p>
+                </div>
+              ) : users.length === 0 ? (
+                <div className="empty-state">
+                  <h3>No users found</h3>
+                  <p>No users have been registered yet.</p>
+                </div>
+              ) : (
+                <div className="users-container">
+                  <table className="users-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map(user => (
+                        <tr key={user.id}>
+                          <td>{user.id}</td>
+                          <td>{user.username || 'N/A'}</td>
+                          <td>{user.email}</td>
+                          <td>
+                            <span className={`user-role user-role-${user.role}`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td>
+                            {new Date(user.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </td>
+                          <td>
+                            <button 
+                              className="action-btn edit"
+                              onClick={() => handleEditUser(user)}
+                              style={{ marginRight: 4 }}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="action-btn delete"
+                              onClick={() => handleDeleteUser(user.id)}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -386,6 +601,65 @@ export default function AdminDashboard() {
               <button className="delete-modal-btn cancel" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
               <button className="delete-modal-btn delete" onClick={confirmDelete}>Delete</button>
             </div>
+          </div>
+        </div>
+      )}
+      {showStatusUpdatePopup && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ minWidth: 260, textAlign: 'center', padding: '32px 24px' }}>
+            <div className="modal-header" style={{ justifyContent: 'center', marginBottom: 0 }}>
+              <span style={{ color: '#48bb78', fontWeight: 700, fontSize: '1.2rem' }}>{statusUpdateMessage}</span>
+              <button className="modal-close-btn" onClick={() => setShowStatusUpdatePopup(false)} title="Close">&times;</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showEditUserModal && (
+        <div className="modal-overlay" onClick={handleCancelEditUser}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              Edit User
+              <button className="modal-close-btn" onClick={handleCancelEditUser} title="Close">&times;</button>
+            </div>
+            <form className="user-form" onSubmit={(e) => { e.preventDefault(); handleSaveUser(); }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '12px 16px', alignItems: 'center', maxWidth: 400 }}>
+                <label htmlFor="edit-username">Username</label>
+                <input 
+                  id="edit-username" 
+                  name="username" 
+                  value={editUserForm.username} 
+                  onChange={handleEditUserFormChange} 
+                  required 
+                />
+                <label htmlFor="edit-email">Email</label>
+                <input 
+                  id="edit-email" 
+                  name="email" 
+                  type="email" 
+                  value={editUserForm.email} 
+                  onChange={handleEditUserFormChange} 
+                  required 
+                />
+                <label htmlFor="edit-role">Role</label>
+                <select 
+                  id="edit-role" 
+                  name="role" 
+                  value={editUserForm.role} 
+                  onChange={handleEditUserFormChange}
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div style={{ marginTop: '16px' }}>
+                <button type="submit">
+                  Save Changes
+                </button>
+                <button type="button" onClick={handleCancelEditUser} style={{ marginLeft: '8px' }}>
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -39,6 +39,19 @@ export const orderService = {
       console.error('Error fetching all orders:', error);
       throw error;
     }
+  },
+
+  async updateOrderStatus(orderId, status) {
+    try {
+      console.log('Updating order status:', { orderId, status });
+      const response = await api.patch(`/orders/${orderId}/status`, { status });
+      console.log('Update response:', response);
+      return response;
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      console.error('Error details:', error.response?.data);
+      throw error;
+    }
   }
 };
 

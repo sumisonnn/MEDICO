@@ -76,6 +76,11 @@ export const api = {
     body: JSON.stringify(data)
   }),
   
+  patch: (endpoint, data) => apiCall(endpoint, {
+    method: 'PATCH',
+    body: JSON.stringify(data)
+  }),
+  
   delete: (endpoint) => apiCall(endpoint, {
     method: 'DELETE'
   }),

@@ -190,18 +190,27 @@ export const getOrderById = async (req, res) => {
 // Admin: Update order status (confirm/process)
 export const updateOrderStatus = async (req, res) => {
   try {
+    console.log('Update order status request:', { params: req.params, body: req.body, user: req.user });
     const { orderId } = req.params;
     const { status } = req.body;
-    const allowedStatuses = ['confirmed', 'shipped', 'delivered', 'cancelled'];
+    const allowedStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+    
+    console.log('Checking status:', { status, allowedStatuses, isValid: allowedStatuses.includes(status) });
+    
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
+    
     const order = await Order.findByPk(orderId);
+    console.log('Found order:', order ? { id: order.id, currentStatus: order.status } : 'Not found');
+    
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
+    
     order.status = status;
     await order.save();
+    console.log('Order status updated successfully');
     res.json({ message: `Order status updated to ${status}`, order });
   } catch (error) {
     console.error('Error updating order status:', error);

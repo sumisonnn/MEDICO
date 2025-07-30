@@ -5,8 +5,8 @@ export const Order = sequelize.define('Order', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   userId: { type: DataTypes.INTEGER, allowNull: false, references: { model: 'Users', key: 'id' } },
   status: { 
-    type: DataTypes.ENUM('confirmed', 'shipped', 'delivered', 'cancelled'), 
-    defaultValue: 'confirmed' 
+    type: DataTypes.ENUM('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'), 
+    defaultValue: 'pending' 
   },
   totalAmount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
   deliveryAddress: { type: DataTypes.TEXT, allowNull: false },

@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.js';
 import medicineRoutes from './routes/medicine.js';
 import cartRoutes from './routes/cart.js';
 import orderRoutes from './routes/order.js';
+import userRoutes from './routes/user.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 

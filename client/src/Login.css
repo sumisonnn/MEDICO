@@ -18,7 +18,7 @@ body, html {
   display: flex;
   background: #ffffff;
   box-shadow: 0 8px 32px rgba(60, 80, 180, 0.08), 0 1.5px 6px rgba(0,0,0,0.04);
-  border-radius: 20px;
+  border-radius: 0;
   overflow: hidden;
   max-width: 900px;
   width: 100%;
@@ -28,20 +28,19 @@ body, html {
 .login-image {
   flex: 1;
   min-width: 280px;
-  background: #e7edfd;
+  background: white;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 48px 32px;
+  padding: 0;
 }
 
 .login-image img {
-  max-width: 260px;
   width: 100%;
-  height: auto;
-  border-radius: 16px;
+  height: 100%;
+  border-radius: 0;
   object-fit: contain;
-  box-shadow: 0 2px 12px rgba(60, 80, 180, 0.06);
+  box-shadow: none;
 }
 
 .login-card {

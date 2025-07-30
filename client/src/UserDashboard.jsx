@@ -25,6 +25,8 @@ export default function UserDashboard() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   const [checkoutForm, setCheckoutForm] = useState({
     firstName: '',
     lastName: '',
@@ -150,15 +152,22 @@ export default function UserDashboard() {
       // Refresh cart from backend
       await fetchCart();
       
-      // Switch to cart tab to show the added item
-      setActive('cart');
+      // Show notification
+      setNotificationMessage('Added to cart successfully!');
+      setShowNotification(true);
       
-      // Show popup notification
-      alert('Added to cart successfully!');
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
       
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert(error.response?.data?.error || 'Failed to add to cart');
+      setNotificationMessage(error.response?.data?.error || 'Failed to add to cart');
+      setShowNotification(true);
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
     }
   };
 
@@ -335,7 +344,7 @@ export default function UserDashboard() {
                 {/* New Banner Image */}
                 <div className="dashboard-banner">
                   <img 
-                    src="/src/assets/medicine.png" 
+                    src="/src/assets/med.jpg" 
                     alt="Healthcare Banner" 
                     className="dashboard-banner-image"
                   />
@@ -588,10 +597,9 @@ export default function UserDashboard() {
                     </form>
                     
                     <div className="payment-simple">
-                      <h3>Payment Method</h3>
                       <div className="payment-options-simple">
                         <label>
-                          <input type="radio" name="payment" value="cod" defaultChecked />
+                          <input type="checkbox" name="payment" value="cod" defaultChecked />
                           Cash on Delivery
                         </label>
                       </div>
@@ -773,8 +781,21 @@ export default function UserDashboard() {
         </main>
       </div>
       
-      {/* Popup Notification */}
-      {/* Removed popup notification */}
+      {/* Notification */}
+      {showNotification && (
+        <div className="popup-overlay">
+          <div className="popup-notification">
+            <div className="popup-icon">✓</div>
+            <div className="popup-message">{notificationMessage}</div>
+            <button 
+              className="popup-close" 
+              onClick={() => setShowNotification(false)}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

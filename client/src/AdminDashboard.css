@@ -1084,4 +1084,299 @@ body {
 .delete-modal-btn.delete:hover {
   background: #b91c1c;
   border-color: #b91c1c;
-} 
+}
+
+/* Order Actions Styles */
+.order-actions-admin {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.order-actions-admin h4 {
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.status-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.status-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: capitalize;
+}
+
+.status-btn.confirm {
+  background: #48bb78;
+  color: white;
+}
+
+.status-btn.confirm:hover {
+  background: #38a169;
+  transform: translateY(-1px);
+}
+
+.status-btn.process {
+  background: #3b82f6;
+  color: white;
+}
+
+.status-btn.process:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.status-btn.ship {
+  background: #8b5cf6;
+  color: white;
+}
+
+.status-btn.ship:hover {
+  background: #7c3aed;
+  transform: translateY(-1px);
+}
+
+.status-btn.deliver {
+  background: #059669;
+  color: white;
+}
+
+.status-btn.deliver:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+
+.status-complete {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid #bbf7d0;
+}
+
+/* Responsive Design for Order Actions */
+@media (max-width: 768px) {
+  .status-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .status-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* User Management Styles */
+.users-container {
+  margin-top: 1rem;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.users-table thead {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.users-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.users-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f7fafc;
+  vertical-align: middle;
+}
+
+.users-table tbody tr:hover {
+  background: #f7fafc;
+}
+
+.users-table button {
+  background: #48bb78;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.users-table button:hover {
+  background: #38a169;
+  transform: translateY(-1px);
+}
+
+.users-table button[style*="color: red"] {
+  background: #e53e3e;
+}
+
+.users-table button[style*="color: red"]:hover {
+  background: #c53030;
+}
+
+.users-table .delete-btn {
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(229, 62, 62, 0.08);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  margin-left: 8px;
+}
+
+.users-table .delete-btn:hover {
+  background: #b91c1c;
+  color: #fff;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(229, 62, 62, 0.18);
+}
+
+.users-table .action-btn {
+  padding: 8px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background 0.18s, color 0.18s;
+}
+
+.users-table .action-btn.edit {
+  background: #2563eb;
+  color: #fff;
+}
+
+.users-table .action-btn.edit:hover {
+  background: #1e40af;
+}
+
+.users-table .action-btn.delete {
+  background: #e53e3e;
+  color: #fff;
+}
+
+.users-table .action-btn.delete:hover {
+  background: #b91c1c;
+}
+
+.user-role {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-role-admin {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.user-role-user {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* Responsive Design for User Management */
+@media (max-width: 768px) {
+  .users-table {
+    font-size: 0.875rem;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+/* User Form Styles */
+.user-form {
+  background: #f7fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.user-form input,
+.user-form select {
+  width: 100%;
+  max-width: 180px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  transition: all 0.3s ease;
+  background: #fff;
+}
+
+.user-form input:focus,
+.user-form select:focus {
+  outline: none;
+  border-color: #48bb78;
+  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+}
+
+.user-form button {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(72, 187, 120, 0.2);
+}
+
+.user-form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(72, 187, 120, 0.3);
+}
+
+.user-form button[type="button"] {
+  background: #6b7280;
+}
+
+.user-form button[type="button"]:hover {
+  background: #4b5563;
+}
