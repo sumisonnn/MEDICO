@@ -11,11 +11,36 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+
+  // Email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (e) => {
+    const emailValue = e.target.value;
+    setEmail(emailValue);
+    
+    if (emailValue && !validateEmail(emailValue)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    
+    // Validate email before submission
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
     setLoading(true);
     try {
       await authService.register({
@@ -24,10 +49,11 @@ const Signup = () => {
         password
       });
       
-      setSuccess('Signup successful! Redirecting to login...');
+      setSuccess('Signed up Successfully');
       setName('');
       setEmail('');
       setPassword('');
+      setEmailError('');
       // Redirect to login after 2 seconds
       setTimeout(() => {
         window.location.href = "/login";
@@ -74,10 +100,12 @@ const Signup = () => {
                 type="email"
                 id="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 placeholder="Enter your email"
                 required
+                className={emailError ? 'error-input' : ''}
               />
+              {emailError && <div className="field-error">{emailError}</div>}
             </div>
             <div className="form-group">
               <label htmlFor="password">Password</label>

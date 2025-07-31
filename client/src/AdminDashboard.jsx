@@ -36,9 +36,14 @@ export default function AdminDashboard() {
   const [editingUser, setEditingUser] = useState(null);
   const [editUserForm, setEditUserForm] = useState({
     username: '',
-    email: '',
-    role: 'user'
+    email: ''
   });
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showUpdateSuccessPopup, setShowUpdateSuccessPopup] = useState(false);
+  const [showUserUpdatePopup, setShowUserUpdatePopup] = useState(false);
+  const [showUserDeletePopup, setShowUserDeletePopup] = useState(false);
+  const [showUserDeleteConfirmPopup, setShowUserDeleteConfirmPopup] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   // Carousel functions
   const showSlide = (index) => {
@@ -142,6 +147,12 @@ export default function AdminDashboard() {
       await medicineService.createMedicine(medicineData);
       await fetchMedicines(); // Refresh the list
       clearForm();
+      setShowAddForm(false); // Close the form
+      setShowSuccessPopup(true); // Show success popup
+      // Hide success popup after 2 seconds
+      setTimeout(() => {
+        setShowSuccessPopup(false);
+      }, 2000);
     } catch (error) {
       alert(error.message || 'Failed to add medicine');
     } finally {
@@ -166,6 +177,12 @@ export default function AdminDashboard() {
       await medicineService.updateMedicine(editingId, medicineData);
       await fetchMedicines(); // Refresh the list
       clearForm();
+      setShowAddForm(false); // Close the form
+      setShowUpdateSuccessPopup(true); // Show update success popup
+      // Hide update success popup after 2 seconds
+      setTimeout(() => {
+        setShowUpdateSuccessPopup(false);
+      }, 2000);
     } catch (error) {
       alert(error.message || 'Failed to update medicine');
     } finally {
@@ -194,8 +211,7 @@ export default function AdminDashboard() {
     setEditingUser(user);
     setEditUserForm({
       username: user.username || '',
-      email: user.email || '',
-      role: user.role || 'user'
+      email: user.email || ''
     });
     setShowEditUserModal(true);
   };
@@ -214,8 +230,12 @@ export default function AdminDashboard() {
       await fetchAllUsers(); // Refresh the list
       setShowEditUserModal(false);
       setEditingUser(null);
-      setEditUserForm({ username: '', email: '', role: 'user' });
-      alert('User updated successfully!');
+      setEditUserForm({ username: '', email: '' });
+      setShowUserUpdatePopup(true);
+      // Hide user update popup after 2 seconds
+      setTimeout(() => {
+        setShowUserUpdatePopup(false);
+      }, 2000);
     } catch (error) {
       alert(error.response?.data?.error || 'Failed to update user');
     }
@@ -224,19 +244,35 @@ export default function AdminDashboard() {
   const handleCancelEditUser = () => {
     setShowEditUserModal(false);
     setEditingUser(null);
-    setEditUserForm({ username: '', email: '', role: 'user' });
+    setEditUserForm({ username: '', email: '' });
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await userService.deleteUser(userId);
-        await fetchAllUsers(); // Refresh the list
-        alert('User deleted successfully!');
-      } catch (error) {
-        alert(error.response?.data?.error || 'Failed to delete user');
-      }
+    setUserToDelete(userId);
+    setShowUserDeleteConfirmPopup(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    try {
+      await userService.deleteUser(userToDelete);
+      await fetchAllUsers(); // Refresh the list
+      setShowUserDeleteConfirmPopup(false);
+      setUserToDelete(null);
+      setShowUserDeletePopup(true);
+      // Hide user delete popup after 2 seconds
+      setTimeout(() => {
+        setShowUserDeletePopup(false);
+      }, 2000);
+    } catch (error) {
+      alert(error.response?.data?.error || 'Failed to delete user');
+      setShowUserDeleteConfirmPopup(false);
+      setUserToDelete(null);
     }
+  };
+
+  const cancelDeleteUser = () => {
+    setShowUserDeleteConfirmPopup(false);
+    setUserToDelete(null);
   };
 
   // Order status management
@@ -488,22 +524,16 @@ export default function AdminDashboard() {
                         <th>ID</th>
                         <th>Username</th>
                         <th>Email</th>
-                        <th>Role</th>
                         <th>Created At</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map(user => (
+                      {users.filter(user => user.role !== 'admin').map(user => (
                         <tr key={user.id}>
                           <td>{user.id}</td>
                           <td>{user.username || 'N/A'}</td>
                           <td>{user.email}</td>
-                          <td>
-                            <span className={`user-role user-role-${user.role}`}>
-                              {user.role}
-                            </span>
-                          </td>
                           <td>
                             {new Date(user.createdAt).toLocaleDateString('en-US', {
                               year: 'numeric',
@@ -614,6 +644,90 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {showSuccessPopup && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ minWidth: 260, textAlign: 'center', padding: '32px 24px' }}>
+            <div className="modal-header" style={{ justifyContent: 'center', marginBottom: 0 }}>
+              <span style={{ color: '#48bb78', fontWeight: 700, fontSize: '1.2rem' }}>Product added successfully</span>
+              <button className="modal-close-btn" onClick={() => setShowSuccessPopup(false)} title="Close">&times;</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showUpdateSuccessPopup && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ minWidth: 260, textAlign: 'center', padding: '32px 24px' }}>
+            <div className="modal-header" style={{ justifyContent: 'center', marginBottom: 0 }}>
+              <span style={{ color: '#48bb78', fontWeight: 700, fontSize: '1.2rem' }}>Product updated successfully</span>
+              <button className="modal-close-btn" onClick={() => setShowUpdateSuccessPopup(false)} title="Close">&times;</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showUserUpdatePopup && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ minWidth: 260, textAlign: 'center', padding: '32px 24px' }}>
+            <div className="modal-header" style={{ justifyContent: 'center', marginBottom: 0 }}>
+              <span style={{ color: '#48bb78', fontWeight: 700, fontSize: '1.2rem' }}>User updated successfully</span>
+              <button className="modal-close-btn" onClick={() => setShowUserUpdatePopup(false)} title="Close">&times;</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showUserDeleteConfirmPopup && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ minWidth: 300, textAlign: 'center', padding: '32px 24px' }}>
+            <div className="modal-header" style={{ justifyContent: 'center', marginBottom: '16px' }}>
+              <span style={{ color: '#e53e3e', fontWeight: 700, fontSize: '1.2rem' }}>Confirm Delete</span>
+              <button className="modal-close-btn" onClick={cancelDeleteUser} title="Close">&times;</button>
+            </div>
+            <div style={{ marginBottom: '20px' }}>
+              <p style={{ fontSize: '1rem', color: '#4a5568' }}>Are you sure you want to delete this user?</p>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={cancelDeleteUser}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#e2e8f0',
+                  color: '#4a5568',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteUser}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#e53e3e',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showUserDeletePopup && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-content" style={{ minWidth: 260, textAlign: 'center', padding: '32px 24px' }}>
+            <div className="modal-header" style={{ justifyContent: 'center', marginBottom: 0 }}>
+              <span style={{ color: '#48bb78', fontWeight: 700, fontSize: '1.2rem' }}>User deleted successfully</span>
+              <button className="modal-close-btn" onClick={() => setShowUserDeletePopup(false)} title="Close">&times;</button>
+            </div>
+          </div>
+        </div>
+      )}
       {showEditUserModal && (
         <div className="modal-overlay" onClick={handleCancelEditUser}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -640,16 +754,6 @@ export default function AdminDashboard() {
                   onChange={handleEditUserFormChange} 
                   required 
                 />
-                <label htmlFor="edit-role">Role</label>
-                <select 
-                  id="edit-role" 
-                  name="role" 
-                  value={editUserForm.role} 
-                  onChange={handleEditUserFormChange}
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
               </div>
               <div style={{ marginTop: '16px' }}>
                 <button type="submit">
