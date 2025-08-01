@@ -1,10 +1,16 @@
 import express from 'express';
-import { getAllUsers, getUserById, updateUser, deleteUser } from '../controller/userController.js';
+import { getAllUsers, getUserById, updateUser, deleteUser, getCurrentUserProfile, updateCurrentUserProfile } from '../controller/userController.js';
 import { authenticateToken, isAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
-router.use(authenticateToken); // All user routes require authentication
-router.use(isAdmin); // All user routes require admin access
+
+// Current user routes (no admin required)
+router.get('/profile', authenticateToken, getCurrentUserProfile);
+router.put('/profile', authenticateToken, updateCurrentUserProfile);
+
+// Admin routes (require admin access)
+router.use(authenticateToken); // All remaining routes require authentication
+router.use(isAdmin); // All remaining routes require admin access
 
 router.get('/all', getAllUsers);
 router.get('/:userId', getUserById);

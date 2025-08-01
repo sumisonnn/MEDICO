@@ -39,6 +39,28 @@ export const userService = {
       console.error('Error deleting user:', error);
       throw error;
     }
+  },
+
+  // Get current user profile
+  async getCurrentUserProfile() {
+    try {
+      const response = await api.get('/users/profile');
+      return response;
+    } catch (error) {
+      console.error('Error fetching current user profile:', error);
+      throw error;
+    }
+  },
+
+  // Update current user profile
+  async updateCurrentUserProfile(userData) {
+    try {
+      const response = await api.put('/users/profile', userData);
+      return response;
+    } catch (error) {
+      console.error('Error updating current user profile:', error);
+      throw error;
+    }
   }
 };
 

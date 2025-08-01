@@ -17,6 +17,12 @@ export const authService = {
     return userData ? JSON.parse(userData) : null;
   },
 
+  // Get current user from localStorage (alias for compatibility)
+  getUser: () => {
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData) : null;
+  },
+
   // Get user role
   getUserRole: () => {
     return localStorage.getItem('userRole');

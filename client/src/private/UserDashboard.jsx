@@ -4,6 +4,7 @@ import Logout from '../components/Logout';
 import medicineService from '../services/medicineService.js';
 import cartService from '../services/cartService.js';
 import orderService from '../services/orderService.js';
+import userService from '../services/userService.js';
 import logoIcon from '../assets/logo.png';
 
 const sections = [
@@ -207,22 +208,40 @@ export default function UserDashboard() {
   // Profile functions
   const fetchProfile = async () => {
     try {
-      // Get user info from localStorage or API
-      const userInfo = JSON.parse(localStorage.getItem('user'));
-      if (userInfo) {
-        setProfile({
-          username: userInfo.username || '',
-          email: userInfo.email || '',
-          phone: userInfo.phone || ''
-        });
-        setProfileForm({
-          username: userInfo.username || '',
-          email: userInfo.email || '',
-          phone: userInfo.phone || ''
-        });
-      }
+      // Get user info from backend API
+      const response = await userService.getCurrentUserProfile();
+      const userData = response.user;
+      
+      setProfile({
+        username: userData.username || '',
+        email: userData.email || '',
+        phone: userData.phone || ''
+      });
+      setProfileForm({
+        username: userData.username || '',
+        email: userData.email || '',
+        phone: userData.phone || ''
+      });
     } catch (error) {
       console.error('Error fetching profile:', error);
+      // Fallback to localStorage if API fails
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('userData'));
+        if (userInfo) {
+          setProfile({
+            username: userInfo.username || '',
+            email: userInfo.email || '',
+            phone: userInfo.phone || ''
+          });
+          setProfileForm({
+            username: userInfo.username || '',
+            email: userInfo.email || '',
+            phone: userInfo.phone || ''
+          });
+        }
+      } catch (localStorageError) {
+        console.error('Error reading from localStorage:', localStorageError);
+      }
     }
   };
 
@@ -239,13 +258,34 @@ export default function UserDashboard() {
 
   const handleSaveProfile = async () => {
     try {
-      // Update profile logic here
-      setProfile(profileForm);
+      // Update profile in backend
+      const response = await userService.updateCurrentUserProfile({
+        username: profileForm.username,
+        email: profileForm.email
+      });
+      
+      // Update local state with new data
+      const updatedUser = response.user;
+      setProfile({
+        username: updatedUser.username || '',
+        email: updatedUser.email || '',
+        phone: profileForm.phone || ''
+      });
+      
+      // Update localStorage with new data
+      const currentUser = JSON.parse(localStorage.getItem('userData') || '{}');
+      const updatedUserData = {
+        ...currentUser,
+        username: updatedUser.username,
+        email: updatedUser.email
+      };
+      localStorage.setItem('userData', JSON.stringify(updatedUserData));
+      
       setIsEditingProfile(false);
       alert('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile');
+      alert('Failed to update profile: ' + (error.response?.data?.error || error.message));
     }
   };
 
