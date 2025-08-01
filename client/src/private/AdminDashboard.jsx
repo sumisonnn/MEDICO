@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import './AdminDashboard.css';
-import Logout from './components/Logout';
-import medicineService from './services/medicineService.js';
-import orderService from './services/orderService.js';
-import userService from './services/userService.js';
-import logoIcon from './assets/MEDICOOO.jpg';
-import whyImage from './assets/why.png';
-import ok2Image from './assets/ok2.jpg';
-import bannerImage from './assets/banner.jpg';
+import '../styles/AdminDashboard.css';
+import Logout from '../components/Logout';
+import medicineService from '../services/medicineService.js';
+import orderService from '../services/orderService.js';
+import userService from '../services/userService.js';
+import logoIcon from '../assets/MEDICOOO.jpg';
+import whyImage from '../assets/why.png';
+import ok2Image from '../assets/ok2.jpg';
+import bannerImage from '../assets/banner.jpg';
 
 const sections = [
   { key: 'manage-medicine', label: 'Manage Medicine' },

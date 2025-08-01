@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import './UserDashboard.css';
-import Logout from './components/Logout';
-import medicineService from './services/medicineService.js';
-import cartService from './services/cartService.js';
-import orderService from './services/orderService.js';
-import logoIcon from './assets/logo.png';
+import '../styles/UserDashboard.css';
+import Logout from '../components/Logout';
+import medicineService from '../services/medicineService.js';
+import cartService from '../services/cartService.js';
+import orderService from '../services/orderService.js';
+import logoIcon from '../assets/logo.png';
 
 const sections = [
   { key: 'dashboard', label: 'Home' },

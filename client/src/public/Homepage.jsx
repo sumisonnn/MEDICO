@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './HomePage.css';
-import HeroImage from './assets/pharama.png'; // Use a relevant pharma image
-import logoIcon from './assets/MEDICOOO.jpg'; // Your MEDICO logo path
+import '../styles/HomePage.css';
+import HeroImage from '../assets/pharama.png'; // Use a relevant pharma image
+import logoIcon from '../assets/MEDICOOO.jpg'; // Your MEDICO logo path
 
 const HomePage = () => {
   const navigate = useNavigate();

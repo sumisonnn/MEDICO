@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import './Signup.css';
-import signupImage from './assets/log.png'; // Replace with your image
-import logoIcon from './assets/logo.png'; // Replace with your logo
-import authService from './services/authService.js';
+import '../styles/Signup.css';
+import signupImage from '../assets/log.png'; // Replace with your image
+import logoIcon from '../assets/logo.png'; // Replace with your logo
+import authService from '../services/authService.js';
 
 const Signup = () => {
   const [name, setName] = useState('');

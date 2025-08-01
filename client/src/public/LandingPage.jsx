@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "./LandingPage.css";
-import landingImage from "./assets/pharama.png";
+import "../styles/LandingPage.css";
+import landingImage from "../assets/pharama.png";
 
 export default function LandingPage() {
   const navigate = useNavigate();

@@ -1,11 +1,11 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LandingPage from "./LandingPage";
-import HomePage from "./HomePage";
-import Login from "./Login";
-import Signup from "./Signup";
-import AdminDashboard from "./AdminDashboard";
-import UserDashboard from "./UserDashboard";
+import LandingPage from "./public/LandingPage";
+import HomePage from "./public/HomePage";
+import Login from "./public/Login";
+import Signup from "./public/Signup";
+import AdminDashboard from "./private/AdminDashboard";
+import UserDashboard from "./private/UserDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
